@@ -1,0 +1,27 @@
+Package: FLSRTMB
+Title: FLSR in TMB
+Version: 1.0.3
+Authors@R: 
+ c(
+   person("Henning", "Winker", email = "henning.winker@ec.europa.eu",
+    role = c("aut", "cre")),
+  person("European Union", role = c("fnd", "cph")),
+  person("Iago", "Mosqueira", email = "iago.mosqueira@wur.nl",
+    role = c("aut"), comment = c(ORCID = "0000-0002-3252-0591"))
+ )
+Description: Estimates FLR spawner recruitment relationships in TMB
+License: EUPL
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Depends:
+  FLCore (>= 2.6.16),
+  FLBRP
+Imports: 
+  TMB (>= 1.7.19)
+Suggests:
+  ggplotFL
+LinkingTo: 
+  TMB,
+  RcppEigen
