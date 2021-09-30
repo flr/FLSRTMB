@@ -3,7 +3,6 @@ useDynLib(FLSRTMB)
 
 import("TMB")
 import("FLCore")
-import("FLBRP")
 
 exportPattern("^[[:alpha:]]+")
 

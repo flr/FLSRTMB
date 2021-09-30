@@ -7,8 +7,6 @@
 #
 # Distributed under the terms of the EUPL-1.2
 
-# XX {{{
-# }}}
 
 # TEST
 library(ggplotFL)
