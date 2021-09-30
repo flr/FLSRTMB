@@ -18,11 +18,11 @@ Installing `FLSRTMB` requires the librabry(devtools), which can be install by 'i
 
 `devtools::install_github("flr/ggplotFL")`
 
-`devtools::install_github("henning-winker/FLSRTMB")`
+`devtools::install_github("flr/FLSRTMB")`
 
 `library(FLSRTMB)`
 
-Compiling C++ in windows can be troublesome. As an alternative to installing from github, a windows package binary zip file can be downloaded [here](https://github.com/Henning-Winker/FLSRTMB/tree/main/BinaryPackage/win).
+Compiling C++ in windows can be troublesome. As an alternative to installing from github, a windows package binary zip file can be downloaded [here](https://github.com/flr/FLSRTMB/tree/main/BinaryPackage/win).
 
 # Quick test drive
 
