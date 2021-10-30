@@ -1,6 +1,6 @@
 Package: FLSRTMB
 Title: FLSR in TMB
-Version: 1.0.4
+Version: 1.0.5
 Authors@R: 
  c(
    person("Henning", "Winker", email = "henning.winker@ec.europa.eu",
@@ -14,7 +14,7 @@ License: EUPL
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Depends:
   FLCore (>= 2.6.16)
 Imports: 

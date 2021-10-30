@@ -4,10 +4,12 @@
 \alias{spr0y}
 \title{spr0y()}
 \usage{
-spr0y(object)
+spr0y(object, byage = FALSE)
 }
 \arguments{
 \item{object}{class FLStock}
+
+\item{byage}{if TRUE it return spr0_at_age}
 }
 \value{
 FLQuant with annual spr0y
@@ -16,5 +18,5 @@ FLQuant with annual spr0y
 Function to compute annual spr0
 }
 \author{
-Laurance Kell
+Laurence Kell
 }
