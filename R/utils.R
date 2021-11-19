@@ -62,3 +62,41 @@ sprFy = function(object,byage = FALSE){
   if(byage) rtn = fec * survivors
   if(!byage) rtn =  apply(fec * survivors, 2, sum)
   rtn}
+
+#' resilience()
+#'
+#' Function to compute r, generation time (gt) and annual reproductive rate (alpha)
+#' @param object class FLStock
+#' @param s steepness of the stock recruitment relationship
+#' @return FLQuants with FLQuant r, gt and alpha
+#' @export
+#' @author Henning Winker and Laurence Kell 
+resilience <- function(object,s=0.7){ 
+  spr0 = spr0y(object)
+  spr0_a = spr0y(object,byage=T)
+  # Reproductive output Rs for bonyfish
+  rs = 4*s/(spr0*(1-s))
+  wm = stock.wt(object)*mat(object)
+  nage = dim(object)[1]
+  nyr = dim(object)[2]
+  age = dims(object)$min:dims(object)$max 
+  
+  r=gt = alpha = FLQuant(NA,dimnames=list(year=dims(object)$minyear:dims(object)$maxyear))  
+  
+  # Make Leslie matrix 
+  for(y in 1:dim(object)[2]){
+    L=mat.or.vec(nage,nage)
+    L[1,] =   an(rs[,y])*wm[,y]
+    #fill rest of Matrix with Survival
+    for(i  in 2:nage) L[i,(i-1)] = exp(-m(object)[i,1]) 
+    # Plus group
+    L[nage,(i)] = exp(-m(object)[nage,y]) 
+    # Net reproductive rate
+    r[,y]=log(as.numeric(eigen(L)$values[1]))
+    gt[,y] = sum(age*spr0_a[,y])/spr0[,y]
+    alpha[,y] = rs[,y]
+  }
+  
+  # return intrinsic rate of population increase r and generation GT
+  return(FLQuants(r=r,gt=gt))
+}
