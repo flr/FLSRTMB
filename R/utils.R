@@ -81,10 +81,12 @@ resilience <- function(object,s=0.7){
   nyr = dim(object)[2]
   age = dims(object)$min:dims(object)$max 
   
-  r=gt = alpha = FLQuant(NA,dimnames=list(year=dims(object)$minyear:dims(object)$maxyear))  
+  r = FLQuant(NA,dimnames=list(year=dims(object)$minyear:dims(object)$maxyear),units="1/year")  
+  gt = FLQuant(NA,dimnames=list(year=dims(object)$minyear:dims(object)$maxyear),units="years")  
   
   # Make Leslie matrix 
   for(y in 1:dim(object)[2]){
+    if(is.na(spr0[,y])) next() 
     L=mat.or.vec(nage,nage)
     L[1,] =   an(rs[,y])*wm[,y]
     #fill rest of Matrix with Survival
@@ -94,7 +96,6 @@ resilience <- function(object,s=0.7){
     # Net reproductive rate
     r[,y]=log(as.numeric(eigen(L)$values[1]))
     gt[,y] = sum(age*spr0_a[,y])/spr0[,y]
-    alpha[,y] = rs[,y]
   }
   
   # return intrinsic rate of population increase r and generation GT
