@@ -1,21 +1,23 @@
 #' from_logits()
 #'
 #' convert steepness from logit
-#' @param logit_h logit(steepness)
-#' @return steepness h 
+#' @param logit_s logit(steepness)
+#' @param lim defines lower prior bound of s
+#' @return steepness s 
 #' @export
-from_logits <- function(logit_h){
-  out=  0.2001 + 0.7998*1/(1+exp(-logit_h))
-  out}
+from_logits <- function(logit_s,lim=0.2){
+  lim+0.001 + (1-lim-0.001) * 1/(1 + exp(-logit_s))}
+
 
 #' to_logits()
 #'
 #' convert steepness to logit
-#' @param h steepness h
-#' @return logit transformed steepness h 
+#' @param s steepness s
+#' @param lim defines lower prior bound of s
+#' @return logit transformed steepness s 
 #' @export
-to_logits <- function(h){
-  -log(0.7998/(h-0.2001)-1) 
+to_logits <- function(s,lim=0.2){
+  -log((1-lim-0.001)/(s - lim+0.001) - 1) 
 }
 
 #' spr0y()

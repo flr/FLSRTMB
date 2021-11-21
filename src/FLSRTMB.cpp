@@ -21,6 +21,7 @@ Type objective_function<Type>::operator() () {
   DATA_SCALAR( spr0 );
   DATA_SCALAR( plim ); // minimum bp of hockey-stick as fraction of Blim/B0
   DATA_INTEGER(nyears);
+  DATA_SCALAR( slim ); 
   DATA_INTEGER(Rmodel); // Recruitment model
   
   // Parameters
@@ -30,7 +31,7 @@ Type objective_function<Type>::operator() () {
   // Derived quantities
   Type r0 = exp(log_r0);
   Type sigR = exp(log_sigR);
-  Type s = 0.2001 + 0.7998*1/(1+exp(-logit_s));
+  Type s =slim+0.001 + (1-slim-0.001)*1/(1+exp(-logit_s));
   vector<Type> log_rec_hat( nyears );
   vector<Type> vy = spr0y * r0;
   
@@ -89,7 +90,7 @@ Type objective_function<Type>::operator() () {
     a = r0/b;
   }
   
-  // prior s
+
   
   
   // Reporting

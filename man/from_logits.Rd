@@ -4,13 +4,15 @@
 \alias{from_logits}
 \title{from_logits()}
 \usage{
-from_logits(logit_h)
+from_logits(logit_s, lim = 0.2)
 }
 \arguments{
-\item{logit_h}{logit(steepness)}
+\item{logit_s}{logit(steepness)}
+
+\item{lim}{defines lower prior bound of s}
 }
 \value{
-steepness h
+steepness s
 }
 \description{
 convert steepness from logit

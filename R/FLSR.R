@@ -17,6 +17,7 @@
 #' @param s.est option to estimate steepness
 #' @param s.logitsd prior sd for logit(s), default is 1.3 (flat) if s.est = TRUE 
 #' @param plim determines the minimum break point of the hockey-stick as ratio blim/b0
+#' @param pmax determines the maximum break point of the hockey-stick as ratio blim/b0
 #' @param nyears yearMeans from the tail used to compute a,b from the reference spr0 (default all years)
 #' @param report.sR0 option to report s and R0 instead of a,b
 #' @param inits option to specify initial values of log(r0), log(SigR) and logit(s)
@@ -28,19 +29,26 @@
 #' @return A list containing elements 'FLSR', of class *FLSR*
 #' @export
 
-srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.3,plim=NULL,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
+srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax=0.30,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
   SDreport=TRUE) {
   
   if(is.null(nyears)) nyears = dim(ssb(object))[2]
   if(is.null(plim)){
-    if(is.null(s)& s.est){ plim=0.01} else {plim=0.2}
+    if(is.null(s)& s.est){ plim=0.01} else {plim=0.1}
   }
-  
-  if(is.null(s)& s.est){s=0.6} # central value
-  if(is.null(s)& !s.est){s=0.8}
   
   # IDENTIFY model
   model <- SRModelName(model(object))
+  
+  if(model=="segreg"){ # Adjust dynamically
+  lim =plim/pmax
+  s = mean(c(lim,1))  
+  } else {
+  lim=0.2  
+  if(is.null(s)& s.est){s=mean(c(lim,1))} # central value for s = 0.2-1.0
+  if(is.null(s)& !s.est){s=0.7}
+  }
+  
 
   if(length(spr0)>1){
   #if(length(ssb(object))+1!=length(spr0)) stop("The spr0 vector must correct to non NA values of ssb(stock)")
@@ -58,8 +66,11 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.3,plim=NULL,nyea
   ssb <- c(ssb(object))
 
   # SET init and bounds
-  if(is.null(inits))
-    inits <- c(mean(log(rec)), log(0.4),to_logits(s))
+  if(model=="segreg"){
+    if(is.null(inits)) inits <- c(mean(log(rec)), log(0.4),to_logits(lim*1.1,lim=lim))
+  } 
+  if(is.null(inits)) inits <- c(mean(log(rec)), log(0.4),to_logits(s,lim=lim))
+  
   if(is.null(lower))
     lower <- c(min(log(rec)), log(0.05),-20)
   if(is.null(upper))
@@ -68,8 +79,8 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.3,plim=NULL,nyea
   # SET TMB input
   inp <- list(
     # data
-    Data = list(ssb = ssb, rec = rec,prior_s = c(to_logits(s),s.logitsd),
-    spr0y = spr0.yr,spr0=spr0ref,plim=plim, nyears=length(ssb),
+    Data = list(ssb = ssb, rec = rec,prior_s = c(to_logits(s,lim),s.logitsd),
+    spr0y = spr0.yr,spr0=spr0ref,plim=plim, nyears=length(ssb),slim=lim,
     # model
     Rmodel = which(model==c("bevholtSV","rickerSV","segreg"))-1),
     # inits
