@@ -11,7 +11,7 @@ srrTMB(
   s.est = TRUE,
   s.logitsd = 1.4,
   plim = 0.05,
-  pmax = 0.3,
+  pmax = 0.5,
   nyears = NULL,
   report.sR0 = FALSE,
   inits = NULL,
