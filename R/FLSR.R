@@ -29,7 +29,7 @@
 #' @return A list containing elements 'FLSR', of class *FLSR*
 #' @export
 
-srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax=0.30,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
+srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax=0.50,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
   SDreport=TRUE) {
   
   if(is.null(nyears)) nyears = dim(ssb(object))[2]
@@ -64,12 +64,17 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax
   # GET rec, ssb
   rec <- c(rec(object))
   ssb <- c(ssb(object))
-
+  # Set r0 init
+  r0init= data.frame(rec=rec,ssb=ssb)       
+  r0init=median(r0init[quantile(r0init$ssb,0.5)>r0init$ssb,]$rec)
+  
+  
   # SET init and bounds
   if(model=="segreg"){
-    if(is.null(inits)) inits <- c(mean(log(rec)), log(0.4),to_logits(lim*1.1,lim=lim))
+    if(is.null(inits)) inits <- c(an(quantile(log(rec),0.4)), log(0.3),to_logits(min(lim*5,0.9),lim=lim))
+    #if(is.null(inits)) inits <- c(log(r0init), log(0.4),to_logits(s,lim=lim))
   } 
-  if(is.null(inits)) inits <- c(mean(log(rec)), log(0.4),to_logits(s,lim=lim))
+  if(is.null(inits)) inits <- c(log(r0init), log(0.4),to_logits(s,lim=lim))
   
   if(is.null(lower))
     lower <- c(min(log(rec)), log(0.05),-20)
