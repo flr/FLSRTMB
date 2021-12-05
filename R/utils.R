@@ -82,9 +82,9 @@ resilience <- function(object,s=0.7){
   nage = dim(object)[1]
   nyr = dim(object)[2]
   age = dims(object)$min:dims(object)$max 
-  
-  r = FLQuant(NA,dimnames=list(year=dims(object)$minyear:dims(object)$maxyear),units="1/year")  
-  gt = FLQuant(NA,dimnames=list(year=dims(object)$minyear:dims(object)$maxyear),units="years")  
+  dn <- list(age='all', year=dims(object)$minyear:dims(object)$maxyear, unit='unique', season='all',area='unique')
+  r = FLQuant(NA,dimnames=dn,units="1/year")  
+  gt = FLQuant(NA,dimnames=dn,units="years") 
   
   # Make Leslie matrix 
   for(y in 1:dim(object)[2]){
