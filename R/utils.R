@@ -65,7 +65,7 @@ sprFy = function(object,byage = FALSE){
   if(!byage) rtn =  apply(fec * survivors, 2, sum)
   rtn}
 
-#' resilience()
+#' productivity()
 #'
 #' Function to compute r, generation time (gt) and annual reproductive rate (alpha)
 #' @param object class FLStock
@@ -73,7 +73,7 @@ sprFy = function(object,byage = FALSE){
 #' @return FLQuants with FLQuant r, gt and alpha
 #' @export
 #' @author Henning Winker and Laurence Kell 
-resilience <- function(object,s=0.7){ 
+productivity <- function(object,s=0.7){ 
   spr0 = spr0y(object)
   spr0_a = spr0y(object,byage=T)
   # Reproductive output Rs for bonyfish
