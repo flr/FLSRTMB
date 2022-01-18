@@ -22,6 +22,7 @@ Type objective_function<Type>::operator() () {
   DATA_SCALAR( plim ); // minimum bp of hockey-stick as fraction of Blim/B0
   DATA_INTEGER(nyears);
   DATA_SCALAR( slim ); 
+  DATA_SCALAR( smax ); 
   DATA_INTEGER(Rmodel); // Recruitment model
   
   // Parameters
@@ -31,18 +32,21 @@ Type objective_function<Type>::operator() () {
   // Derived quantities
   Type r0 = exp(log_r0);
   Type sigR = exp(log_sigR);
-  Type s =slim+0.001 + (1-slim-0.001)*1/(1+exp(-logit_s));
+  Type sinit = slim+0.001 + (smax-slim-0.001)*1/(1+exp(-logit_s));
+  
   vector<Type> log_rec_hat( nyears );
   vector<Type> vy = spr0y * r0;
   
   Type a = 0;
   Type b = 0;
+  Type s = 0;
   
   // Objective function
   Type ans=0;
   Type v = r0 * spr0;// compute SB0
   
   if(Rmodel==0){ // bevholtSV()
+    s = sinit;
     for( int t=0; t< nyears; t++){
       log_rec_hat(t) = log(4.0 * s * r0 *ssb(t) / (vy(t)*(1.0-s)+ssb(t)*(5.0*s-1.0)));//-pow(sigR,2)/2.0;
     }
@@ -50,8 +54,9 @@ Type objective_function<Type>::operator() () {
   
   if(Rmodel==1){ // rickerSV()
     for( int t=0; t< nyears; t++){
-      b = log(5.0*s)/(0.8*v);
-      a = exp(b*v)/spr0;
+      s = sinit*20;
+      b = log(5.0*s)/(0.8*vy(t));
+      a = exp(b*vy(t))/spr0;
       log_rec_hat(t) = log(a*ssb(t)*exp(-b*ssb(t)));
       //log_rec_hat(t) = log(r0 * ssb(t) / v * exp(s*(1.0-ssb(t)/v)));
     }
@@ -59,6 +64,7 @@ Type objective_function<Type>::operator() () {
   
   if(Rmodel==2){ // segreg() aka Hockey Stick
     for( int t=0; t< nyears; t++){
+      s = sinit;
       //log_rec_hat(t) = log(r0)+log(2.5*s/v*(ssb(t)+0.2*v/s-pow(pow(ssb(t)-0.2*v/s,2.0),0.5)));//-pow(sigR,2)/2.0;
       log_rec_hat(t) = log(r0)+log(0.5/plim*s/vy(t)*(ssb(t)+plim*vy(t)/s-pow(pow(ssb(t)-plim*vy(t)/s,2.0),0.5)));
     }

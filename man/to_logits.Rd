@@ -4,12 +4,14 @@
 \alias{to_logits}
 \title{to_logits()}
 \usage{
-to_logits(s, lim = 0.2)
+to_logits(s, ll = 0.2, ul = 1)
 }
 \arguments{
 \item{s}{steepness s}
 
 \item{lim}{defines lower prior bound of s}
+
+\item{max}{defines upper prior bound of s}
 }
 \value{
 logit transformed steepness s

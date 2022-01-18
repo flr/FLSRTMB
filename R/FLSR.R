@@ -28,6 +28,12 @@
 #'
 #' @return A list containing elements 'FLSR', of class *FLSR*
 #' @export
+#' @examples
+#' data(ple4)
+#' bh <- srrTMB(as.FLSR(ple4,model=bevholtSV),spr0=spr0y(ple4))
+#' ri <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=spr0y(ple4))
+#' hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=spr0y(ple4),plim=0.05,pmax=0.3)
+#' plot(FLSRs(bh=bh,ri=ri,hs=hs))
 
 srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax=0.50,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
   SDreport=TRUE) {
@@ -41,15 +47,22 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax
   model <- SRModelName(model(object))
   
   if(model=="segreg"){ # Adjust dynamically
-  lim =plim/pmax
-  s = mean(c(lim,1))  
-  } else {
-  lim=0.2  
-  if(is.null(s)& s.est){s=mean(c(lim,1))} # central value for s = 0.2-1.0
+  ll =plim/pmax
+  ul = 1
+  s = mean(c(lim,ul)) 
+  }
+  if(model=="rickerSV"){
+   ll = 0.2
+   ul = 20
+   s = mean(c(ll,ul))
+  } 
+  if(model=="bevholtSV"){
+  ll=0.2  
+  ul = 1
+  if(is.null(s)& s.est){s=mean(c(ll,ul))} # central value for s = 0.2-1.0
   if(is.null(s)& !s.est){s=0.7}
   }
   
-
   if(length(spr0)>1){
   #if(length(ssb(object))+1!=length(spr0)) stop("The spr0 vector must correct to non NA values of ssb(stock)")
   spr0.yr =  trim(spr0,year=dims(ssb(object))[["minyear"]]:dims(ssb(object))[["maxyear"]])
@@ -71,10 +84,10 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax
   
   # SET init and bounds
   if(model=="segreg"){
-    if(is.null(inits)) inits <- c(an(quantile(log(rec),0.4)), log(0.3),to_logits(min(lim*5,0.9),lim=lim))
+    if(is.null(inits)) inits <- c(an(quantile(log(rec),0.4)), log(0.3),to_logits(min(ll*5,0.9),ll=ll))
     #if(is.null(inits)) inits <- c(log(r0init), log(0.4),to_logits(s,lim=lim))
   } 
-  if(is.null(inits)) inits <- c(log(r0init), log(0.4),to_logits(s,lim=lim))
+  if(is.null(inits)) inits <- c(log(r0init), log(0.4),to_logits(s,ll=ll,ul=ul))
   
   if(is.null(lower))
     lower <- c(min(log(rec)), log(0.05),-20)
@@ -84,8 +97,8 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax
   # SET TMB input
   inp <- list(
     # data
-    Data = list(ssb = ssb, rec = rec,prior_s = c(to_logits(s,lim),s.logitsd),
-    spr0y = spr0.yr,spr0=spr0ref,plim=plim, nyears=length(ssb),slim=lim,
+    Data = list(ssb = ssb, rec = rec,prior_s = c(to_logits(s,ll,ul),s.logitsd),
+    spr0y = spr0.yr,spr0=spr0ref,plim=plim, nyears=length(ssb),slim=ll,smax=ul,
     # model
     Rmodel = which(model==c("bevholtSV","rickerSV","segreg"))-1),
     # inits

@@ -4,12 +4,14 @@
 \alias{from_logits}
 \title{from_logits()}
 \usage{
-from_logits(logit_s, lim = 0.2)
+from_logits(logit_s, ll = 0.2, ul = 1)
 }
 \arguments{
 \item{logit_s}{logit(steepness)}
 
-\item{lim}{defines lower prior bound of s}
+\item{ll}{defines lower prior bound of s}
+
+\item{ul}{defines upper prior bound of s}
 }
 \value{
 steepness s
