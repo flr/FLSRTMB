@@ -1,6 +1,6 @@
 Package: FLSRTMB
 Title: FLSR in TMB
-Version: 1.0.6
+Version: 1.0.7
 Authors@R: 
  c(
    person("Henning", "Winker", email = "henning.winker@ec.europa.eu",
@@ -17,6 +17,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Depends:
   FLCore (>= 2.6.16),
+  ggplot2,
   ggplotFL
 Imports: 
   TMB (>= 1.7.19)

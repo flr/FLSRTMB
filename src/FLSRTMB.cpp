@@ -37,9 +37,9 @@ Type objective_function<Type>::operator() () {
   vector<Type> log_rec_hat( nyears );
   vector<Type> vy = spr0y * r0;
   
-  Type a = 0;
-  Type b = 0;
-  Type s = 0;
+  Type a = 0.001;
+  Type b = 0.001;
+  Type s = 0.5;
   
   // Objective function
   Type ans=0;
@@ -54,7 +54,7 @@ Type objective_function<Type>::operator() () {
   
   if(Rmodel==1){ // rickerSV()
     for( int t=0; t< nyears; t++){
-      s = sinit*20;
+      s = sinit; // removed *20
       b = log(5.0*s)/(0.8*vy(t));
       a = exp(b*vy(t))/spr0;
       log_rec_hat(t) = log(a*ssb(t)*exp(-b*ssb(t)));
@@ -95,9 +95,8 @@ Type objective_function<Type>::operator() () {
     b = plim*v/s;
     a = r0/b;
   }
-  
 
-  
+ 
   
   // Reporting
   REPORT( rec_hat );
@@ -108,8 +107,8 @@ Type objective_function<Type>::operator() () {
   REPORT( a );
   REPORT( b );
   REPORT( s );
-  ADREPORT(a);
-  ADREPORT( b );
+  ADREPORT(log(a));
+  ADREPORT( log(b));
   
   return ans;
 }

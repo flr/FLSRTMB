@@ -49,7 +49,7 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax
   if(model=="segreg"){ # Adjust dynamically
   ll =plim/pmax
   ul = 1
-  s = mean(c(lim,ul)) 
+  s = mean(c(ll,ul)) 
   }
   if(model=="rickerSV"){
    ll = 0.2
@@ -87,7 +87,11 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax
     if(is.null(inits)) inits <- c(an(quantile(log(rec),0.4)), log(0.3),to_logits(min(ll*5,0.9),ll=ll))
     #if(is.null(inits)) inits <- c(log(r0init), log(0.4),to_logits(s,lim=lim))
   } 
+  
   if(is.null(inits)) inits <- c(log(r0init), log(0.4),to_logits(s,ll=ll,ul=ul))
+  
+  if(is.null(inits)) inits <- c(log(r0init), log(0.4),to_logits(s,ll=ll,ul=ul))
+  
   
   if(is.null(lower))
     lower <- c(min(log(rec)), log(0.05),-20)
@@ -148,10 +152,16 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax
     attr(object,"SV") = data.frame(sigmaR=Report$sigR,R0=Report$r0)
     
   }
+  # Add loglik
+  attr(object@logLik,"df") = 2
+  attr(object@logLik,"nobs") = 20 
+  object@logLik[] = Obj$fn()
   
   if(SDreport & report.sR0==FALSE){
     object@vcov = matrix(SD$cov,nrow=2,dimnames = list(c("a","b"),c("a","b")))
   }
+  
+  
 
   return(object)
 }

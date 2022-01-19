@@ -53,3 +53,10 @@ A list containing elements 'FLSR', of class \emph{FLSR}
 \description{
 Fits Stock Recruitment Relationships (SRR) in TBM
 }
+\examples{
+data(ple4)
+bh <- srrTMB(as.FLSR(ple4,model=bevholtSV),spr0=spr0y(ple4))
+ri <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=spr0y(ple4))
+hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=spr0y(ple4),plim=0.05,pmax=0.3)
+plot(FLSRs(bh=bh,ri=ri,hs=hs))
+}
