@@ -19,7 +19,7 @@
 #' all= FLSRs(hs=hs,bh=bh,ri=ri,bh.tv=bh.tv,ri.tv=ri.tv)
 #' plotsrts(all)
 #' do.call(c,lapply(all,function(x)AIC(x))) # AIC
-#' plot(all)+theme(legend.position="right")
+#' plotsrs(all,path=T)
 
 plotsrts <- function(object){
 
@@ -39,10 +39,63 @@ if(class(object)=="FLSRs"){
   
   df2$name = factor(df2$name,levels=unique(df2$name))
   
-  p = ggplot(df,aes(year,data))+geom_point(pch=21,color=1,fill="white")+
-    geom_line(data=df2,aes(year,data,color=name))+theme(legend.title = element_blank())+
-    ylab("Recruitment")+xlab("Year")
+  p = ggplot(df2,aes(year,data,color=name))+
+    geom_line()+theme(legend.title = element_blank())+
+    ylab("Recruitment")+xlab("Year")+geom_point(data=df,aes(year,data) ,pch=21,color=1,fill="white")
 }  
 return(p)
 }  
 #}}}
+
+
+# plotsrs {{{ based on plot(FLSRs)
+
+#' @param object of class FLSRS 
+#' @param path connect points sequentially 
+#' @return ggpplot
+#' @export 
+
+plotsrs <- function(object,path=TRUE) {
+            x= object
+            uns <- units(x[[1]])
+            
+           
+              dat <- Reduce(rbind, Map(function(x, i)
+                cbind(sr=i, model.frame(FLQuants(ssb=ssb(x), rec=rec(x)), drop=TRUE)),
+                x[1], names(x[1])))
+            
+            # EXTRACT models & pars
+            mods <- lapply(x, 'model')
+            pars <- lapply(x, 'params')
+            inp <- data.frame(ssb=seq(0, max(dat$ssb), length=100), rec=NA)
+            
+            # RESULTS
+            res <- lapply(names(mods), function(x) {
+              data.frame(sr=x, ssb=inp$ssb,
+                         rec=eval(as.list(mods[[x]])[[3]], c(list(ssb=inp$ssb), as(pars[[x]], 'list')))
+              )
+            })
+            
+            res <- Reduce('rbind', res)
+            res$sr = factor(res$sr,levels=object@names)
+            # GET plot
+            p <- ggplot(na.omit(res), aes(x=ssb, y=rec, colour=sr)) +
+              geom_line() +
+              xlab(as.expression(paste0("SSB (", sub('\\*', '%.%', uns$ssb), ")"))) +
+              ylab(as.expression(paste0("Recruits (", sub('\\*', '%.%', uns$rec), ")"))) +
+              theme(legend.position="right",legend.title = element_blank()) 
+            
+            if(path){
+              p = p+geom_path(data=dat,cex=0.1,col="black",linetype=1,alpha=0.4)+
+                geom_point(data=dat,color=1,cex=c(rep(1.5,nrow(dat)-1),2.),pch=21,fill=c(rep("white",nrow(dat)-1),"black"))
+              
+            } else {
+              p <- p+geom_point(data=dat,color=1,fill="white",pch=21,cex=1.8)
+            }
+            
+            return(p)
+          }
+          
+# }}}
+
+
