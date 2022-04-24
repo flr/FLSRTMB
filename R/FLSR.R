@@ -21,7 +21,7 @@
 #' @param s steepness parameter of SRR (fixed or prior mean)    
 #' @param spr0 unfished spawning biomass per recruit from FLCore::spr0(FLStock) 
 #' @param s.est option to estimate steepness
-#' @param s.logitsd prior sd for logit(s), default is 1.3 (flat) if s.est = TRUE 
+#' @param s.logitsd prior sd for logit(s), default is 1.4 (flat) if s.est = TRUE 
 #' @param plim determines the minimum break point of the hockey-stick as ratio blim/b0
 #' @param pmax determines the maximum break point of the hockey-stick as ratio blim/b0
 #' @param nyears yearMeans from the tail used to compute a,b from the reference spr0 (default all years)
