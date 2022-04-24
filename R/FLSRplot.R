@@ -12,7 +12,7 @@
 #' bh <- srrTMB(as.FLSR(ple4,model=bevholtSV),spr0=mean(spr0y(ple4)))
 #' plotsrts(bh)
 #' # Try more models
-#' hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=(spr0y(ple4)),plim=0.02,pmax=0.3)
+#' hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=(spr0y(ple4)),plim=0.05,pmax=0.2)
 #' ri <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=mean(spr0y(ple4)))
 #' bh.tv <- srrTMB(as.FLSR(ple4,model=bevholtSV),spr0=spr0y(ple4))
 #' ri.tv <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=spr0y(ple4))
@@ -27,8 +27,8 @@ if(class(object)=="FLSR"){
 df = data.frame(as.data.frame(rec(object)),ssb=as.data.frame(ssb(object))$data)
 df2 = data.frame(as.data.frame(fitted(object)),name=object@name)  
 
-p = ggplot(df,aes(year,data))+geom_point(pch=21,color=1,fill="white")+
-  geom_line(data=df2,aes(year,data))+theme(legend.title = element_blank())+
+p = ggplot(df,aes(year,data))+theme_bw()+geom_point(pch=21,color=1,fill="white")+
+  geom_line(data=df2,aes(year,data),size=0.8)+theme(legend.title = element_blank())+
   ylab("Recruitment")+xlab("Year")  
 }
 if(class(object)=="FLSRs"){  
@@ -39,8 +39,8 @@ if(class(object)=="FLSRs"){
   
   df2$name = factor(df2$name,levels=unique(df2$name))
   
-  p = ggplot(df2,aes(year,data,color=name))+
-    geom_line()+theme(legend.title = element_blank())+
+  p = ggplot(df2,aes(year,data,color=name))+theme_bw()+
+    geom_line(size=0.8)+theme(legend.title = element_blank())+
     ylab("Recruitment")+xlab("Year")+geom_point(data=df,aes(year,data) ,pch=21,color=1,fill="white")
 }  
 return(p)
@@ -81,7 +81,7 @@ plotsrs <- function(object,path=TRUE) {
             res$sr = factor(res$sr,levels=object@names)
             # GET plot
             p <- ggplot(na.omit(res), aes(x=ssb, y=rec, colour=sr)) +
-              geom_line(size=1) + theme_bw()+
+              geom_line(size=0.8) + theme_bw()+
               xlab(as.expression(paste0("SSB (", sub('\\*', '%.%', uns$ssb), ")"))) +
               ylab(as.expression(paste0("Recruits (", sub('\\*', '%.%', uns$rec), ")"))) +
               theme(legend.position="right",legend.title = element_blank()) 
