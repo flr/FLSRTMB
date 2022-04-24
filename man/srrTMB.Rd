@@ -22,7 +22,7 @@ srrTMB(
 )
 }
 \arguments{
-\item{object}{Input FLSR object with current model options
+\item{object}{Input FLSR = as.FLSR(stock,model) object with current model options
 \itemize{
 \item bevholtSV
 \item rickerSV
