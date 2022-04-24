@@ -11,7 +11,13 @@
 
 #' Fits Stock Recruitment Relationships (SRR) in TBM
 #'
-#' @param object Input FLSR object.
+#' @param object Input FLSR object with current model options
+#' \itemize{
+  #'   \item bevholtSV   
+  #'   \item rickerSV
+  #'   \item segreg
+  #'   \item geomean
+  #' }    
 #' @param s steepness parameter of SRR (fixed or prior mean)    
 #' @param spr0 unfished spawning biomass per recruit from FLCore::spr0(FLStock) 
 #' @param s.est option to estimate steepness
@@ -30,10 +36,14 @@
 #' @export
 #' @examples
 #' data(ple4)
+#' gm <- srrTMB(as.FLSR(ple4,model=geomean),spr0=spr0y(ple4))
 #' bh <- srrTMB(as.FLSR(ple4,model=bevholtSV),spr0=spr0y(ple4))
 #' ri <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=spr0y(ple4))
 #' hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=spr0y(ple4),plim=0.05,pmax=0.3)
-#' plotsrs(FLSRs(bh=bh,ri=ri,hs=hs))
+#' srs = FLSRs(gm=gm,bh=bh,ri=ri,hs=hs) # combine
+#' plotsrs(srs) 
+#' plotsrts(srs) 
+#' do.call(rbind,lapply(srs,AIC))
 
 srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax=0.50,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
   SDreport=TRUE,verbose=FALSE) {
@@ -47,6 +57,14 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax
   
   # IDENTIFY model
   model <- SRModelName(model(object))
+  
+  # check 
+  if(model%in%c("bevholt","ricker"))
+    stop(paste0("Please use ",model,"SV instead"))
+  
+  if(!model%in%c("mean","segreg","bevholtSV","rickerSV"))
+     stop(paste("S-R model:",model,"is not (yet) defined in FLSRTMB"))
+  
   
   if(model=="segreg"){ # Adjust dynamically
   ll =plim/pmax
@@ -79,6 +97,33 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax
   # GET rec, ssb
   rec <- c(rec(object))
   ssb <- c(ssb(object))
+  
+  
+  # Simple geomean option with time-varying spr0y
+  if(model=="mean"){
+  if(length(unique(spr0.yr))>1){ 
+     gm = lm(log(rec)~log(spr0.yr))} else {
+     gm = lm(log(rec)~1)
+     } 
+  
+  fitted(object) <- an(exp(predict(gm,data.frame(spr0.yr))))
+  residuals(object) <- log(rec(object)) - log(fitted(object))
+  params(object) <- FLPar(a= an(exp(predict(gm,data.frame(spr0.yr= spr0ref)))))
+ 
+  # Add loglik manually (to learn)
+  p = length(gm$coefficients)
+  N = length(fitted(object))
+  sigma <- summary(gm)$sigma*sqrt((N-p)/N) # correct for p
+  attr(object@logLik,"df") = p+1
+  attr(object@logLik,"nobs") = length(fitted(object)) 
+  object@logLik[] =  sum(dnorm(0, mean=residuals(gm), sd=sigma, log=TRUE))
+  #check logLik(gm)
+  object@vcov = matrix(0,nrow=1,dimnames = list(c("a"),c("a")))
+  attr(object,"SV") = data.frame(sigmaR=summary(gm)$sigma,R0=an(exp(predict(gm,data.frame(spr0.yr= spr0ref)))))
+  }
+  
+  # TMB models
+  if(!model=="mean"){
   # Set r0 init
   r0init= data.frame(rec=rec,ssb=ssb)       
   r0init=median(r0init[quantile(r0init$ssb,0.5)>r0init$ssb,]$rec)
@@ -156,16 +201,20 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax
     attr(object,"SV") = data.frame(sigmaR=Report$sigR,R0=Report$r0)
     
   }
-  # Add loglik
-  attr(object@logLik,"df") = 2
-  attr(object@logLik,"nobs") = 20 
-  object@logLik[] = Obj$fn()
+  
+  # Add full loglik
+  p = 2
+  N = length(residuals(object))
+  sigma <- Report$sigR*sqrt((N-p)/N) # correct for p
+  attr(object@logLik,"df") = p+1
+  attr(object@logLik,"nobs") = length(fitted(object)) 
+  object@logLik[] =  sum(dnorm(0, mean=residuals(object), sd=sigma, log=TRUE))
+  
   
   if(SDreport & report.sR0==FALSE){
     object@vcov = matrix(SD$cov,nrow=2,dimnames = list(c("a","b"),c("a","b")))
   }
-  
-  
+  } # End TMB model
 
   return(object)
 }

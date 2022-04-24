@@ -22,7 +22,13 @@ srrTMB(
 )
 }
 \arguments{
-\item{object}{Input FLSR object.}
+\item{object}{Input FLSR object with current model options
+\itemize{
+\item bevholtSV
+\item rickerSV
+\item segreg
+\item geomean
+}}
 
 \item{spr0}{unfished spawning biomass per recruit from FLCore::spr0(FLStock)}
 
@@ -58,8 +64,12 @@ Fits Stock Recruitment Relationships (SRR) in TBM
 }
 \examples{
 data(ple4)
+gm <- srrTMB(as.FLSR(ple4,model=geomean),spr0=spr0y(ple4))
 bh <- srrTMB(as.FLSR(ple4,model=bevholtSV),spr0=spr0y(ple4))
 ri <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=spr0y(ple4))
 hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=spr0y(ple4),plim=0.05,pmax=0.3)
-plotsrs(FLSRs(bh=bh,ri=ri,hs=hs))
+srs = FLSRs(gm=gm,bh=bh,ri=ri,hs=hs) # combine
+plotsrs(srs) 
+plotsrts(srs) 
+do.call(rbind,lapply(srs,AIC))
 }
