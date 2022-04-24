@@ -17,7 +17,8 @@ srrTMB(
   inits = NULL,
   lower = NULL,
   upper = NULL,
-  SDreport = TRUE
+  SDreport = TRUE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -46,6 +47,8 @@ srrTMB(
 \item{upper}{option to specify upper bounds of log(r0), log(SigR) and logit(s)}
 
 \item{SDreport}{option to converge hessian and get vcov}
+
+\item{verbose}{if TRUE, it shows tracing}
 }
 \value{
 A list containing elements 'FLSR', of class \emph{FLSR}
@@ -58,5 +61,5 @@ data(ple4)
 bh <- srrTMB(as.FLSR(ple4,model=bevholtSV),spr0=spr0y(ple4))
 ri <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=spr0y(ple4))
 hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=spr0y(ple4),plim=0.05,pmax=0.3)
-plot(FLSRs(bh=bh,ri=ri,hs=hs))
+plotsrs(FLSRs(bh=bh,ri=ri,hs=hs))
 }

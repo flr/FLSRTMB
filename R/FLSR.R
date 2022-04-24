@@ -25,7 +25,7 @@
 #' @param upper option to specify upper bounds of log(r0), log(SigR) and logit(s)
 #' @param upper option to specify upper bounds of log(r0), log(SigR) and logit(s)
 #' @param SDreport option to converge hessian and get vcov
-#'
+#' @param verbose if TRUE, it shows tracing
 #' @return A list containing elements 'FLSR', of class *FLSR*
 #' @export
 #' @examples
@@ -33,10 +33,12 @@
 #' bh <- srrTMB(as.FLSR(ple4,model=bevholtSV),spr0=spr0y(ple4))
 #' ri <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=spr0y(ple4))
 #' hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=spr0y(ple4),plim=0.05,pmax=0.3)
-#' plot(FLSRs(bh=bh,ri=ri,hs=hs))
+#' plotsrs(FLSRs(bh=bh,ri=ri,hs=hs))
 
 srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax=0.50,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
-  SDreport=TRUE) {
+  SDreport=TRUE,verbose=FALSE) {
+  
+  silent = ifelse(verbose,1,0)
   
   if(is.null(nyears)) nyears = dim(ssb(object))[2]
   if(is.null(plim)){
@@ -122,8 +124,10 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax
   Obj <- TMB::MakeADFun(data = inp$Data, parameters = inp$Params,map=Map,
     DLL = "FLSRTMB", silent = TRUE)
 
+ 
+  
   Opt <- stats::nlminb(start=Obj$par, objective=Obj$fn, gradient=Obj$gr,
-    control=list("trace"=1, "eval.max"=1e4, "iter.max"=1e4),
+    control=list("trace"=silent, "eval.max"=1e4, "iter.max"=1e4),
     lower=inp$lower, upper=inp$upper)
 
   Opt[["diagnostics"]] = data.frame(Est=Opt$par,

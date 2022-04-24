@@ -48,8 +48,9 @@ return(p)
 #}}}
 
 
-# plotsrs {{{ based on plot(FLSRs)
+#' plotsrs {{{ based on plot(FLSRs)
 
+#' Plots FLSRs, i.e. multiple S-R relationships
 #' @param object of class FLSRS 
 #' @param path connect points sequentially 
 #' @return ggpplot
@@ -80,7 +81,7 @@ plotsrs <- function(object,path=TRUE) {
             res$sr = factor(res$sr,levels=object@names)
             # GET plot
             p <- ggplot(na.omit(res), aes(x=ssb, y=rec, colour=sr)) +
-              geom_line() +
+              geom_line(size=1) + theme_bw()+
               xlab(as.expression(paste0("SSB (", sub('\\*', '%.%', uns$ssb), ")"))) +
               ylab(as.expression(paste0("Recruits (", sub('\\*', '%.%', uns$rec), ")"))) +
               theme(legend.position="right",legend.title = element_blank()) 
