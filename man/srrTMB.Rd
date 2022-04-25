@@ -6,7 +6,7 @@
 \usage{
 srrTMB(
   object,
-  spr0,
+  spr0 = "missing",
   s = NULL,
   s.est = TRUE,
   s.logitsd = 1.4,
@@ -64,12 +64,13 @@ Fits Stock Recruitment Relationships (SRR) in TBM
 }
 \examples{
 data(ple4)
-gm <- srrTMB(as.FLSR(ple4,model=geomean),spr0=spr0y(ple4))
+gm <- srrTMB(as.FLSR(ple4,model=geomean))
 bh <- srrTMB(as.FLSR(ple4,model=bevholtSV),spr0=spr0y(ple4))
 ri <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=spr0y(ple4))
 hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=spr0y(ple4),plim=0.05,pmax=0.3)
 srs = FLSRs(gm=gm,bh=bh,ri=ri,hs=hs) # combine
 plotsrs(srs) 
 plotsrts(srs) 
+bh@SV # estimates
 do.call(rbind,lapply(srs,AIC))
 }

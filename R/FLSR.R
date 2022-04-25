@@ -36,16 +36,17 @@
 #' @export
 #' @examples
 #' data(ple4)
-#' gm <- srrTMB(as.FLSR(ple4,model=geomean),spr0=spr0y(ple4))
+#' gm <- srrTMB(as.FLSR(ple4,model=geomean))
 #' bh <- srrTMB(as.FLSR(ple4,model=bevholtSV),spr0=spr0y(ple4))
 #' ri <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=spr0y(ple4))
 #' hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=spr0y(ple4),plim=0.05,pmax=0.3)
 #' srs = FLSRs(gm=gm,bh=bh,ri=ri,hs=hs) # combine
 #' plotsrs(srs) 
 #' plotsrts(srs) 
+#' bh@SV # estimates
 #' do.call(rbind,lapply(srs,AIC))
 
-srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax=0.50,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
+srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax=0.50,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
   SDreport=TRUE,verbose=FALSE) {
   
   silent = ifelse(verbose,1,0)
@@ -57,6 +58,13 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax
   
   # IDENTIFY model
   model <- SRModelName(model(object))
+  
+  if(model=="mean"){
+    if(missing(spr0)) spr0 = 1  
+  }
+  if(!model=="mean"){
+    if(missing(spr0)){
+      stop(paste("Required to specify spr0 for model",model))}}
   
   # check 
   if(model%in%c("bevholt","ricker"))
@@ -92,7 +100,7 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax
   }
   
   spr0.yr = c(spr0.yr)
-  spr0ref = mean(spr0.yr[(length(spr0.yr)-nyears+1):(length(spr0.yr))])
+  spr0ref = gm(spr0.yr[(length(spr0.yr)-nyears+1):(length(spr0.yr))])
     
   # GET rec, ssb
   rec <- c(rec(object))
@@ -102,28 +110,32 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax
   # Simple geomean option with time-varying spr0y
   if(model=="mean"){
   if(length(unique(spr0.yr))>1){ 
-     gm = lm(log(rec)~log(spr0.yr))} else {
-     gm = lm(log(rec)~1)
+     gmfit = lm(log(rec)~log(spr0.yr))} else {
+       gmfit = lm(log(rec)~1)
      } 
   
-  fitted(object) <- an(exp(predict(gm,data.frame(spr0.yr))))
+  fitted(object) <- an(exp(predict(gmfit,data.frame(spr0.yr))))
   residuals(object) <- log(rec(object)) - log(fitted(object))
-  params(object) <- FLPar(a= an(exp(predict(gm,data.frame(spr0.yr= spr0ref)))))
+  params(object) <- FLPar(a= an(exp(predict(gmfit,data.frame(spr0.yr= spr0ref)))))
  
   # Add loglik manually (to learn)
-  p = length(gm$coefficients)
+  p = length(gmfit$coefficients)
   N = length(fitted(object))
-  sigma <- summary(gm)$sigma*sqrt((N-p)/N) # correct for p
+  sigma <- summary(gmfit)$sigma*sqrt((N-p)/N) # correct for p
   attr(object@logLik,"df") = p+1
   attr(object@logLik,"nobs") = length(fitted(object)) 
-  object@logLik[] =  sum(dnorm(0, mean=residuals(gm), sd=sigma, log=TRUE))
-  #check logLik(gm)
+  object@logLik[] =  sum(dnorm(0, mean=residuals(gmfit), sd=sigma, log=TRUE))
+  #check logLik(gmfit)
   object@vcov = matrix(0,nrow=1,dimnames = list(c("a"),c("a")))
-  attr(object,"SV") = data.frame(sigmaR=summary(gm)$sigma,R0=an(exp(predict(gm,data.frame(spr0.yr= spr0ref)))))
+  
+  # AR1 rho
+  rho = stats::cor(residuals(object)[,-N],residuals(object)[,-1])
+  attr(object,"SV") = data.frame(sigmaR=summary(gmfit)$sigma,R0=an(exp(predict(gmfit,data.frame(spr0.yr= spr0ref)))),rho=rho)
   }
   
   # TMB models
   if(!model=="mean"){
+    
   # Set r0 init
   r0init= data.frame(rec=rec,ssb=ssb)       
   r0init=median(r0init[quantile(r0init$ssb,0.5)>r0init$ssb,]$rec)
@@ -195,12 +207,6 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax
   params(object) <- FLPar(a=Report$a, b=Report$b)
   if(report.sR0) params(object) <- FLPar(s=Report$s, R0=Report$r0)
   
-  if(model!="segreg"){
-  attr(object,"SV") = data.frame(s=Report$s,sigmaR=Report$sigR,R0=Report$r0)
-  } else{
-    attr(object,"SV") = data.frame(sigmaR=Report$sigR,R0=Report$r0)
-    
-  }
   
   # Add full loglik
   p = 2
@@ -210,6 +216,17 @@ srrTMB <- function(object, spr0, s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax
   attr(object@logLik,"nobs") = length(fitted(object)) 
   object@logLik[] =  sum(dnorm(0, mean=residuals(object), sd=sigma, log=TRUE))
   
+  # AR1 rho
+  rho = stats::cor(residuals(object)[,-N],residuals(object)[,-1])
+  
+  
+  if(model!="segreg"){
+  attr(object,"SV") = data.frame(s=Report$s,sigmaR=Report$sigR,R0=Report$r0,rho=rho)
+  } else{
+    attr(object,"SV") = data.frame(sigmaR=Report$sigR,R0=Report$r0,rho=rho)
+    
+  }
+ 
   
   if(SDreport & report.sR0==FALSE){
     object@vcov = matrix(SD$cov,nrow=2,dimnames = list(c("a","b"),c("a","b")))

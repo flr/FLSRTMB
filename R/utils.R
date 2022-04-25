@@ -67,6 +67,16 @@ sprFy = function(object,byage = FALSE){
   if(!byage) rtn =  apply(fec * survivors, 2, sum)
   rtn}
 
+#' gm()
+#'
+#' Generic geometric mean function
+#' @param x object
+#' @return FLQuant with annual sprFy  
+#' @export
+gm <- function(x){
+  return(exp(mean(log(x))))
+}
+
 #' productivity()
 #'
 #' Function to compute r, generation time (gt) and annual reproductive rate (alpha)
