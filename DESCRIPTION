@@ -10,6 +10,7 @@ Authors@R:
     role = c("aut"), comment = c(ORCID = "0000-0002-3252-0591"))
  )
 Description: Estimates FLR spawner recruitment relationships in TMB
+X-schema.org-keywords: stock-recruit, fisheries, flr, R, TMB, AD
 License: EUPL
 Encoding: UTF-8
 LazyData: true
