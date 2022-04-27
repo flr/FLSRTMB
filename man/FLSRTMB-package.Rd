@@ -6,6 +6,8 @@
 \alias{FLSRTMB-package}
 \title{FLSRTMB: FLSR in TMB}
 \description{
+\if{html}{\figure{logo.png}{options: align='right' alt='logo' width='120'}}
+
 Estimates FLR spawner recruitment relationships in TMB
 }
 \author{
