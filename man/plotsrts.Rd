@@ -27,5 +27,5 @@ ri.tv <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=spr0y(ple4))
 all= FLSRs(hs=hs,bh=bh,ri=ri,bh.tv=bh.tv,ri.tv=ri.tv)
 plotsrts(all)
 do.call(c,lapply(all,function(x)AIC(x))) # AIC
-plotsrs(all,path=T)
+plotsrs(all,path=TRUE)
 }

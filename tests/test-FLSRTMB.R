@@ -37,7 +37,7 @@ plot(bh)
 
 params(srrTMB(sr,s.est=T, spr0=spr0,report.sR0 = TRUE))
 
-ri = srrTMB(as.FLSR(ple4,model=RickerSV),s.est=T, spr0=spr0)
+ri = srrTMB(as.FLSR(ple4,model=rickerSV),s.est=T, spr0=spr0)
 
 
 #For many stock spr0 time-varying due to variations in weight-at-age, M-at-age or maturity-at-age plot(spr0y(ple4))+ylab("spr0")
