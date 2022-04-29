@@ -37,4 +37,5 @@ plotsrs(all,path=FALSE)
 plotsrs(all,b0=TRUE)
 # plot all relative relative to B0
 plotsrs(all,rel=TRUE)
+plotsrs(all,rel=TRUE,b0=TRUE)
 }
