@@ -2,10 +2,10 @@
 % Please edit documentation in R/FLSRplot.R
 \name{plotsrs}
 \alias{plotsrs}
-\title{plotsrs {{{ based on plot(FLSRs)
+\title{plotsrs based on plot(FLSRs)
 Plots FLSRs, i.e. multiple S-R relationships}
 \usage{
-plotsrs(object, path = TRUE)
+plotsrs(object, path = TRUE, b0 = FALSE, rel = FALSE)
 }
 \arguments{
 \item{object}{of class FLSRS}
@@ -16,6 +16,25 @@ plotsrs(object, path = TRUE)
 ggpplot
 }
 \description{
-plotsrs {{{ based on plot(FLSRs)
+plotsrs based on plot(FLSRs)
 Plots FLSRs, i.e. multiple S-R relationships
+}
+\examples{
+data(ple4)
+bh <- srrTMB(as.FLSR(ple4,model=bevholtSV),spr0=mean(spr0y(ple4)))
+plotsrs(bh)
+plotsrs(bh,b0=TRUE) # plot through to B0
+plotsrs(bh,b0=TRUE,rel=TRUE) # plot relative to B0
+# Try more models
+hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=(spr0y(ple4)),plim=0.05,pmax=0.2)
+ri <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=mean(spr0y(ple4)))
+bh.tv <- srrTMB(as.FLSR(ple4,model=bevholtSV),spr0=spr0y(ple4))
+ri.tv <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=spr0y(ple4))
+all= FLSRs(hs=hs,bh=bh,ri=ri,bh.tv=bh.tv,ri.tv=ri.tv)
+plotsrs(all)
+plotsrs(all,path=FALSE)
+# plot through to b0
+plotsrs(all,b0=TRUE)
+# plot all relative relative to B0
+plotsrs(all,rel=TRUE)
 }

@@ -46,7 +46,7 @@
 #' bh@SV # estimates
 #' do.call(rbind,lapply(srs,AIC))
 
-srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=1.4,plim=0.05,pmax=0.50,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
+srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=10,plim=0.01,pmax=0.25,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
   SDreport=TRUE,verbose=FALSE) {
   
   silent = ifelse(verbose,1,0)
@@ -60,7 +60,11 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=1.4,plim
   model <- SRModelName(model(object))
   
   if(model=="mean"){
-    if(missing(spr0)) spr0 = 1  
+    gmB0 = TRUE
+    if(missing(spr0)){
+      spr0 = 1
+      gmB0 = FALSE}
+    if(verbose) cat("spr0 missing for computing B0","\n")
   }
   if(!model=="mean"){
     if(missing(spr0)){
@@ -73,11 +77,26 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=1.4,plim
   if(!model%in%c("mean","segreg","bevholtSV","rickerSV"))
      stop(paste("S-R model:",model,"is not (yet) defined in FLSRTMB"))
   
+  if(length(spr0)>1){
+    #if(length(ssb(object))+1!=length(spr0)) stop("The spr0 vector must correct to non NA values of ssb(stock)")
+    spr0.yr =  trim(spr0,year=dims(ssb(object))[["minyear"]]:dims(ssb(object))[["maxyear"]])
+  } else {
+    spr0.yr= ssb(object)
+    spr0.yr[] = spr0  
+  }
+  
+  spr0.yr = c(spr0.yr)
+  spr0ref = mean(spr0.yr[(length(spr0.yr)-nyears+1):(length(spr0.yr))])
+  
+  
   
   if(model=="segreg"){ # Adjust dynamically
   ll =plim/pmax
   ul = 1
-  s = mean(c(ll,ul)) 
+  #s = an(quantile(c(ll,ul),0.75))
+  srp = an(quantile(an((object@ssb/object@rec)/spr0ref),c(0.5)))
+  srp = max(min(srp,0.9*pmax,srp),plim*1.1)
+  s = 1/(srp/plim)
   }
   if(model=="rickerSV"){
    ll = 0.2
@@ -91,17 +110,7 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=1.4,plim
   if(is.null(s)& !s.est){s=0.7}
   }
   
-  if(length(spr0)>1){
-  #if(length(ssb(object))+1!=length(spr0)) stop("The spr0 vector must correct to non NA values of ssb(stock)")
-  spr0.yr =  trim(spr0,year=dims(ssb(object))[["minyear"]]:dims(ssb(object))[["maxyear"]])
-  } else {
-  spr0.yr= ssb(object)
-  spr0.yr[] = spr0  
-  }
-  
-  spr0.yr = c(spr0.yr)
-  spr0ref = gm(spr0.yr[(length(spr0.yr)-nyears+1):(length(spr0.yr))])
-    
+ 
   # GET rec, ssb
   rec <- c(rec(object))
   ssb <- c(ssb(object))
@@ -130,7 +139,9 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=1.4,plim
   
   # AR1 rho
   rho = stats::cor(residuals(object)[,-N],residuals(object)[,-1])
-  attr(object,"SV") = data.frame(sigmaR=summary(gmfit)$sigma,R0=an(exp(predict(gmfit,data.frame(spr0.yr= spr0ref)))),rho=rho)
+  R0 = an(exp(predict(gmfit,data.frame(spr0.yr= spr0ref))))
+  B0 = ifelse(gmB0,R0*spr0ref,NA)
+  attr(object,"SV") = data.frame(s=NA,sigmaR=summary(gmfit)$sigma,R0=R0,rho=rho,B0=B0)
   }
   
   # TMB models
@@ -147,15 +158,14 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=1.4,plim
     #if(is.null(inits)) inits <- c(log(r0init), log(0.4),to_logits(s,lim=lim))
   } 
   
-  if(is.null(inits)) inits <- c(log(r0init), log(0.4),to_logits(s,ll=ll,ul=ul))
+  if(is.null(inits)) inits <- c(log(r0init), log(0.3),to_logits(s,ll=ll,ul=ul))
   
-  if(is.null(inits)) inits <- c(log(r0init), log(0.4),to_logits(s,ll=ll,ul=ul))
   
   
   if(is.null(lower))
-    lower <- c(min(log(rec)), log(0.05),-20)
+    lower <- c(min(log(rec)), log(0.05),-100)
   if(is.null(upper))
-    upper <- c(max(log(rec * 20)), log(1.5),20)
+    upper <- c(max(log(rec * 20)), log(1.5),100)
 
   # SET TMB input
   inp <- list(
@@ -221,9 +231,9 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=1.4,plim
   
   
   if(model!="segreg"){
-  attr(object,"SV") = data.frame(s=Report$s,sigmaR=Report$sigR,R0=Report$r0,rho=rho)
+  attr(object,"SV") = data.frame(s=Report$s,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref)
   } else{
-    attr(object,"SV") = data.frame(sigmaR=Report$sigR,R0=Report$r0,rho=rho)
+    attr(object,"SV") = data.frame(s.star=Report$s,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref,BlimB0=round(plim*1/Report$s,4))
     
   }
  
