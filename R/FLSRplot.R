@@ -20,16 +20,20 @@
 #' do.call(c,lapply(all,function(x)AIC(x))) # AIC
 
 
-plotsrts <- function(object){
+plotsrts <- function(object,relative=TRUE){
 
+  
+  
+  
 if(class(object)=="FLSR"){  
 df = data.frame(as.data.frame(rec(object)),ssb=as.data.frame(ssb(object))$data)
 df2 = data.frame(as.data.frame(fitted(object)),name=object@name)  
 
 p = ggplot(df,aes(year,data))+theme_bw()+geom_point(pch=21,color=1,fill="white")+
   geom_line(data=df2,aes(year,data),size=0.8)+theme(legend.title = element_blank())+
-  ylab("Recruitment")+xlab("Year")  
+  ylab("Recruitment")+xlab("Year")+theme(legend.position = "none") 
 }
+  
 if(class(object)=="FLSRs"){  
   df = data.frame(as.data.frame(rec(object[[1]])),ssb=as.data.frame(ssb(object[[1]]))$data)
   df2 = do.call(rbind,Map(function(x,y){
@@ -41,6 +45,8 @@ if(class(object)=="FLSRs"){
   p = ggplot(df2,aes(year,data,color=name))+theme_bw()+
     geom_line(size=0.8)+theme(legend.title = element_blank())+
     ylab("Recruitment")+xlab("Year")+geom_point(data=df,aes(year,data) ,pch=21,color=1,fill="white")
+
+  if(length(object)==1) p= p+theme(legend.position = "none")  
 }  
 return(p)
 }  
@@ -161,4 +167,71 @@ plotsrs <- function(object,path=TRUE,b0=FALSE,rel=FALSE){
     return(p)
 } # }}}
 
+
+#' sprior plot 
+
+#' Plots the logit prior distribution for steepness 
+#' @param s steepness, default 0.6 for a approx. uniform prior with s.logistsd = 20
+#' @param s.logitsd s steepness, default 20 for a approx. uniform prior with s = 0.6
+#' @param ll lower bound of s = 0.2
+#' @param ul lower bound of s = 1
+#' @return ggplot
+#' @export
+#' @examples
+#' sprior() # approx. uniform with some curving on bounds
+#' sprior(s=0.8,s.logitsd=0.5) 
+sprior <- function(s=0.6,s.logitsd=20,ll=0.2,ul=1){
+  d=0.00001
+  x.logit = seq(-10,10,0.01)
+  mu.logit = to_logits(s,ll=0.2+d,ul=1-d)
+  y = dnorm(x.logit,mu.logit,s.logitsd)
+  x= from_logits(x.logit)
+  df = data.frame(x=c(0.2,x,1),Density=c(0,y,0))
+  ggplot(df, aes(x,Density))+theme_bw()+
+    geom_area(aes(y=Density),fill="grey",alpha=1,col=1)+
+    geom_vline(xintercept = s,size=0.5,col=2,linetype="dashed")+xlab("Steepness s")
+}
+
+
+#' blimprior plot 
+
+#' Plots the bounds of the hockey-stick break-point  
+#' @param lplim steepness, default 0.6 for a approx. uniform prior with s.logistsd = 20
+#' @param uplim s steepness, default 20 for a approx. uniform prior with s = 0.6
+#' @param s.sdlogit default 20
+#' @param par parameter on x-axis default "plim", else "sstar" 
+#' @return ggplot
+#' @export
+#' @examples
+#' sprior() # approx. uniform with some curving on bounds
+#' sprior(s=0.8,s.logitsd=0.5) 
+blimprior <- function(lplim=0.05,uplim=0.2,s.logitsd=5,par="plim"){
+  d=0.00001
+  ll = lplim/uplim 
+  ul = 1
+  mu = mean(c(lplim,uplim))
+  s = 1/(mu/lplim)
+  
+  1/s*lplim  
+  
+  lplim/s
+  x.logit = seq(-10,10,0.01)
+  mu.logit = to_logits(s,ll=ll+d,ul=1-d)
+  y = dnorm(x.logit,mu.logit,s.logitsd)
+  x= from_logits(x.logit,ll=ll,ul=1)
+  if(par=="plim"){
+  x=  lplim/x
+  df = data.frame(x=c(lplim,x,uplim),Density=c(0,y,0))
+  p <- ggplot(df, aes(x,Density))+theme_bw()+
+    geom_area(aes(y=Density),fill="grey",alpha=1,col=1)+
+    xlim(0,min(1.5*uplim,1))+xlab(expression("Bounds"~B[lim]/B[0]))
+  } else {
+    df = data.frame(x=c(ll,x,ul),Density=c(0,y,0))
+    p <- ggplot(df, aes(x,Density))+theme_bw()+
+      geom_area(aes(y=Density),fill="grey",alpha=1,col=1)+
+      xlim(0,1)+xlab(expression(s^"*"))
+  }
+  return(p)
+}
+ 
 

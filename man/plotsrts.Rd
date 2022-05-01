@@ -4,7 +4,7 @@
 \alias{plotsrts}
 \title{Plots time series of observed and predicted recruitment}
 \usage{
-plotsrts(object)
+plotsrts(object, relative = TRUE)
 }
 \arguments{
 \item{object}{Input FLSR of FLSRs object}

@@ -115,3 +115,21 @@ productivity <- function(object,s=0.7){
   # return intrinsic rate of population increase r and generation GT
   return(FLQuants(r=r,gt=gt))
 }
+
+#' hsblim()
+#'
+#' helper to quickly extract blim, r0 and srp0 = blim/b0 from hockeystick
+#' @param object class FLSR fitted with model segreg
+#' @return FLPar 
+#' @export
+
+hsblim <- function(object){
+  blim = params(object)[[2]]
+  r0 = params(object)[[2]]*params(object)[[1]]
+  if(is.null(object@SV)){
+    out = (FLPar(Blim=blim,R0 =r0))
+  } else {
+    out = (FLPar(Blim=blim,R0 =r0,B0=an(object@SV["B0"]),SRPlim=blim/an(object@SV["B0"])))
+  }
+  return(out)
+}

@@ -9,11 +9,11 @@ srrTMB(
   spr0 = "missing",
   s = NULL,
   s.est = TRUE,
-  s.logitsd = 10,
-  lsrp = 0.01,
-  usrp = 0.35,
-  plim = lsrp,
-  pmax = usrp,
+  s.logitsd = 20,
+  lplim = 0.001,
+  uplim = 0.3,
+  plim = lplim,
+  pmax = uplim,
   nyears = NULL,
   report.sR0 = FALSE,
   inits = NULL,
@@ -40,9 +40,9 @@ srrTMB(
 
 \item{s.logitsd}{prior sd for logit(s), default is 1.4 (flat) if s.est = TRUE}
 
-\item{lsrp}{lower bound of plausible spawning ratio potential SRP}
+\item{lplim}{lower bound of spawning ratio potential SRP, default 0.0001}
 
-\item{usrp}{upper bound of plausible spawning ratio potential SRP}
+\item{uplim}{upper bound of plausible spawning ratio potential SRP , default 0.3}
 
 \item{plim}{depreciated plim = usrp}
 
@@ -73,7 +73,7 @@ data(ple4)
 gm <- srrTMB(as.FLSR(ple4,model=geomean),spr0=mean(spr0y(ple4)))
 bh <- srrTMB(as.FLSR(ple4,model=bevholtSV),spr0=spr0y(ple4))
 ri <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=spr0y(ple4))
-hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=spr0y(ple4),lsrp=0.05,usrp=0.2)
+hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=spr0y(ple4),lplim=0.05,uplim=0.2)
 srs = FLSRs(gm=gm,bh=bh,ri=ri,hs=hs) # combine
 plotsrs(srs) 
 plotsrts(srs)  # relative

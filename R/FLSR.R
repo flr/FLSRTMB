@@ -22,8 +22,8 @@
 #' @param spr0 unfished spawning biomass per recruit from FLCore::spr0(FLStock) 
 #' @param s.est option to estimate steepness
 #' @param s.logitsd prior sd for logit(s), default is 1.4 (flat) if s.est = TRUE 
-#' @param lsrp lower bound of plausible spawning ratio potential SRP
-#' @param usrp upper bound of plausible spawning ratio potential SRP
+#' @param lplim lower bound of spawning ratio potential SRP, default 0.0001
+#' @param uplim upper bound of plausible spawning ratio potential SRP , default 0.3
 #' @param plim depreciated plim = usrp
 #' @param pmax depreciated pmax = lsrp
 #' @param nyears yearMeans from the tail used to compute a,b from the reference spr0 (default all years)
@@ -41,7 +41,7 @@
 #' gm <- srrTMB(as.FLSR(ple4,model=geomean),spr0=mean(spr0y(ple4)))
 #' bh <- srrTMB(as.FLSR(ple4,model=bevholtSV),spr0=spr0y(ple4))
 #' ri <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=spr0y(ple4))
-#' hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=spr0y(ple4),lsrp=0.05,usrp=0.2)
+#' hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=spr0y(ple4),lplim=0.05,uplim=0.2)
 #' srs = FLSRs(gm=gm,bh=bh,ri=ri,hs=hs) # combine
 #' plotsrs(srs) 
 #' plotsrts(srs)  # relative
@@ -50,7 +50,7 @@
 #' gm@SV # estimates
 #' do.call(rbind,lapply(srs,AIC))
 
-srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=10,lsrp=0.01,usrp=0.35,plim=lsrp,pmax=usrp,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
+srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=20,lplim=0.001,uplim=0.3,plim=lplim,pmax=uplim,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
   SDreport=TRUE,verbose=FALSE) {
   
   silent = ifelse(verbose,1,0)
@@ -98,9 +98,8 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=10,lsrp=
   ll =plim/pmax
   ul = 1
   #s = an(quantile(c(ll,ul),0.75))
-  srp = an(quantile(an((object@ssb/object@rec)/spr0ref),c(0.5)))
-  srp = max(min(srp,0.9*pmax,srp),plim*1.1)
-  s = 1/(srp/plim)
+  mu = mean(c(plim,pmax))
+  s = 1/(mu/plim)
   }
   if(model=="rickerSV"){
    ll = 0.2
@@ -122,10 +121,10 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=10,lsrp=
   
   # Simple geomean option with time-varying spr0y
   if(model=="mean"){
-  if(length(unique(spr0.yr))>1){ 
-     gmfit = lm(log(rec)~log(spr0.yr))} else {
+  #if(length(unique(spr0.yr))>1){ 
+     #gmfit = lm(log(rec)~log(spr0.yr))} else {
        gmfit = lm(log(rec)~1)
-     } 
+  #} 
   
   fitted(object) <- an(exp(predict(gmfit,data.frame(spr0.yr))))
   residuals(object) <- log(rec(object)) - log(fitted(object))
@@ -153,12 +152,16 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=10,lsrp=
     
   # Set r0 init
   r0init= data.frame(rec=rec,ssb=ssb)       
-  r0init=median(r0init[quantile(r0init$ssb,0.5)>r0init$ssb,]$rec)
+  r0init=median(r0init[quantile(r0init$ssb,0.6)>r0init$ssb,]$rec)
   
   
   # SET init and bounds
   if(model=="segreg"){
-    if(is.null(inits)) inits <- c(an(quantile(log(rec),0.4)), log(0.3),to_logits(min(ll*5,0.9),ll=ll))
+    srp = an(quantile(an((object@ssb/object@rec)/spr0ref),c(0.6)))
+    srp = max(min(srp,0.9*pmax,srp),plim*1.1)
+    sinit = 0.99 #1/1.1#1/(srp/plim)
+    
+    if(is.null(inits)) inits <- c(an(quantile(log(rec),0.4)), log(0.3),to_logits(sinit,ll=ll))
     #if(is.null(inits)) inits <- c(log(r0init), log(0.4),to_logits(s,lim=lim))
   } 
   
@@ -237,7 +240,7 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=10,lsrp=
   if(model!="segreg"){
   attr(object,"SV") = data.frame(s=Report$s,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref)
   } else{
-    attr(object,"SV") = data.frame(s=NA,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref,BlimB0=round(plim*1/Report$s,4))
+    attr(object,"SV") = data.frame(s=NA,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref)
     
   }
  
