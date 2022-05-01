@@ -22,8 +22,10 @@
 #' @param spr0 unfished spawning biomass per recruit from FLCore::spr0(FLStock) 
 #' @param s.est option to estimate steepness
 #' @param s.logitsd prior sd for logit(s), default is 1.4 (flat) if s.est = TRUE 
-#' @param plim determines the minimum break point of the hockey-stick as ratio blim/b0
-#' @param pmax determines the maximum break point of the hockey-stick as ratio blim/b0
+#' @param lsrp lower bound of plausible spawning ratio potential SRP
+#' @param usrp upper bound of plausible spawning ratio potential SRP
+#' @param plim depreciated plim = usrp
+#' @param pmax depreciated pmax = lsrp
 #' @param nyears yearMeans from the tail used to compute a,b from the reference spr0 (default all years)
 #' @param report.sR0 option to report s and R0 instead of a,b
 #' @param inits option to specify initial values of log(r0), log(SigR) and logit(s)
@@ -36,17 +38,19 @@
 #' @export
 #' @examples
 #' data(ple4)
-#' gm <- srrTMB(as.FLSR(ple4,model=geomean))
+#' gm <- srrTMB(as.FLSR(ple4,model=geomean),spr0=mean(spr0y(ple4)))
 #' bh <- srrTMB(as.FLSR(ple4,model=bevholtSV),spr0=spr0y(ple4))
 #' ri <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=spr0y(ple4))
-#' hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=spr0y(ple4),plim=0.05,pmax=0.3)
+#' hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=spr0y(ple4),lsrp=0.05,usrp=0.2)
 #' srs = FLSRs(gm=gm,bh=bh,ri=ri,hs=hs) # combine
 #' plotsrs(srs) 
-#' plotsrts(srs) 
-#' bh@SV # estimates
+#' plotsrts(srs)  # relative
+#' plotsrs(srs[2:4],b0=TRUE) # through to B0
+#' plotsrs(srs[2:4],b0=TRUE,rel=TRUE)  # relative
+#' gm@SV # estimates
 #' do.call(rbind,lapply(srs,AIC))
 
-srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=10,plim=0.01,pmax=0.25,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
+srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=10,lsrp=0.01,usrp=0.35,plim=lsrp,pmax=usrp,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
   SDreport=TRUE,verbose=FALSE) {
   
   silent = ifelse(verbose,1,0)
@@ -233,7 +237,7 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=10,plim=
   if(model!="segreg"){
   attr(object,"SV") = data.frame(s=Report$s,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref)
   } else{
-    attr(object,"SV") = data.frame(s.star=Report$s,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref,BlimB0=round(plim*1/Report$s,4))
+    attr(object,"SV") = data.frame(s=NA,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref,BlimB0=round(plim*1/Report$s,4))
     
   }
  

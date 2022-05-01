@@ -10,8 +10,10 @@ srrTMB(
   s = NULL,
   s.est = TRUE,
   s.logitsd = 10,
-  plim = 0.01,
-  pmax = 0.25,
+  lsrp = 0.01,
+  usrp = 0.35,
+  plim = lsrp,
+  pmax = usrp,
   nyears = NULL,
   report.sR0 = FALSE,
   inits = NULL,
@@ -38,9 +40,13 @@ srrTMB(
 
 \item{s.logitsd}{prior sd for logit(s), default is 1.4 (flat) if s.est = TRUE}
 
-\item{plim}{determines the minimum break point of the hockey-stick as ratio blim/b0}
+\item{lsrp}{lower bound of plausible spawning ratio potential SRP}
 
-\item{pmax}{determines the maximum break point of the hockey-stick as ratio blim/b0}
+\item{usrp}{upper bound of plausible spawning ratio potential SRP}
+
+\item{plim}{depreciated plim = usrp}
+
+\item{pmax}{depreciated pmax = lsrp}
 
 \item{nyears}{yearMeans from the tail used to compute a,b from the reference spr0 (default all years)}
 
@@ -64,13 +70,15 @@ Fits Stock Recruitment Relationships (SRR) in TBM
 }
 \examples{
 data(ple4)
-gm <- srrTMB(as.FLSR(ple4,model=geomean))
+gm <- srrTMB(as.FLSR(ple4,model=geomean),spr0=mean(spr0y(ple4)))
 bh <- srrTMB(as.FLSR(ple4,model=bevholtSV),spr0=spr0y(ple4))
 ri <- srrTMB(as.FLSR(ple4,model=rickerSV),spr0=spr0y(ple4))
-hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=spr0y(ple4),plim=0.05,pmax=0.3)
+hs <- srrTMB(as.FLSR(ple4,model=segreg),spr0=spr0y(ple4),lsrp=0.05,usrp=0.2)
 srs = FLSRs(gm=gm,bh=bh,ri=ri,hs=hs) # combine
 plotsrs(srs) 
-plotsrts(srs) 
-bh@SV # estimates
+plotsrts(srs)  # relative
+plotsrs(srs[2:4],b0=TRUE) # through to B0
+plotsrs(srs[2:4],b0=TRUE,rel=TRUE)  # relative
+gm@SV # estimates
 do.call(rbind,lapply(srs,AIC))
 }
