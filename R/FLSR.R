@@ -52,8 +52,10 @@
 
 srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=20,lplim=0.001,uplim=0.3,plim=lplim,pmax=uplim,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
   SDreport=TRUE,verbose=FALSE) {
-  
+
   silent = ifelse(verbose,1,0)
+  
+  s.inp = s
   
   if(is.null(nyears)) nyears = dim(ssb(object))[2]
   if(is.null(plim)){
@@ -159,8 +161,11 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=20,lplim
   if(model=="segreg"){
     srp = an(quantile(an((object@ssb/object@rec)/spr0ref),c(0.6)))
     srp = max(min(srp,0.9*pmax,srp),plim*1.1)
+    if(is.null(s.inp)){
     sinit = 0.99 #1/1.1#1/(srp/plim)
-    
+    } else {
+      sinit =  s.inp
+    }
     if(is.null(inits)) inits <- c(an(quantile(log(rec),0.4)), log(0.3),to_logits(sinit,ll=ll))
     #if(is.null(inits)) inits <- c(log(r0init), log(0.4),to_logits(s,lim=lim))
   } 
@@ -250,5 +255,10 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=20,lplim
   }
   } # End TMB model
 
+  attr(object,"settings") = list(s=s.inp,s.est=s.est,s.logitsd=s.logitsd,spr0=spr0,lplim=lplim,uplim=uplim,nyears=nyears,
+                                 inits=inits,lower=lower,upper=upper)
+
+  
+  
   return(object)
 }

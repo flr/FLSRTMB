@@ -5,7 +5,7 @@
 \title{blimprior plot
 Plots the bounds of the hockey-stick break-point}
 \usage{
-blimprior(lplim = 0.05, uplim = 0.2, s.logitsd = 5, par = "plim")
+blimprior(lplim = 0.05, uplim = 0.2, s.logitsd = 10, par = "plim")
 }
 \arguments{
 \item{lplim}{steepness, default 0.6 for a approx. uniform prior with s.logistsd = 20}

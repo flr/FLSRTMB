@@ -205,7 +205,7 @@ sprior <- function(s=0.6,s.logitsd=20,ll=0.2,ul=1){
 #' @examples
 #' sprior() # approx. uniform with some curving on bounds
 #' sprior(s=0.8,s.logitsd=0.5) 
-blimprior <- function(lplim=0.05,uplim=0.2,s.logitsd=5,par="plim"){
+blimprior <- function(lplim=0.05,uplim=0.2,s.logitsd=20,par="plim"){
   d=0.00001
   ll = lplim/uplim 
   ul = 1
