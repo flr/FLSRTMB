@@ -14,7 +14,8 @@
 #' jitter = srrjitter(hs)
 #' plotsrs(jitter$groups)
 #' plotsrs(jitter$best) # Best
-
+#' # Relax lower bound
+#' plotsrs(FLSRs(init=hs,best=jitter$best))
 
 srrjitter <- function(fit,steps=100){
 srrfit = fit 
