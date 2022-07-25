@@ -10,6 +10,7 @@ srrTMB(
   s = NULL,
   s.est = TRUE,
   s.logitsd = 20,
+  r0.pr = "missing",
   lplim = 0.001,
   uplim = 0.3,
   plim = lplim,
@@ -39,6 +40,8 @@ srrTMB(
 \item{s.est}{option to estimate steepness}
 
 \item{s.logitsd}{prior sd for logit(s), default is 1.4 (flat) if s.est = TRUE}
+
+\item{r0.pr}{option to condition models on r0 priors (NULL = geomean)}
 
 \item{lplim}{lower bound of spawning ratio potential SRP, default 0.0001}
 

@@ -17,6 +17,7 @@ Type objective_function<Type>::operator() () {
   DATA_VECTOR( rec );
   DATA_VECTOR( ssb );
   DATA_VECTOR( prior_s ); // Prior vector for s, [logit(mean), stdev in logit, useflag]
+  DATA_VECTOR( prior_r0 );
   DATA_VECTOR( spr0y );
   DATA_SCALAR( spr0 );
   DATA_SCALAR( plim ); // minimum bp of hockey-stick as fraction of Blim/B0
@@ -79,6 +80,11 @@ Type objective_function<Type>::operator() () {
   
   //prior s
   ans -= dnorm(logit_s, prior_s(0), prior_s(1), 1); // Prior for logn
+  
+  //r0 prior
+  if(prior_r0(2)==1){
+  ans -= dnorm(log_r0, prior_r0(0), prior_r0(1), 1);
+  }
   
   
   if(Rmodel==0){
