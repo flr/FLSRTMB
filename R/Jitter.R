@@ -75,7 +75,8 @@ out = data.frame(x=lplim/s.range,LL=LL,AIC=aic,run=1:steps,group=factor(group))
 out = data.frame(x=s.range,LL=LL,AIC=aic,run=1:steps,group=factor(group))
 }
 
-ibest = which(out$LL==out$LL)[1]
+ibest = which(round(out$LL,4)==max(round(out$LL,4)))
+ibest= ibest[ceiling(length(ibest)/2)]
 
 init = fit
 best = srrTMB(srrfit,spr0=settings$spr0,
