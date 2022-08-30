@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FLSRTMB</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.3</span>
       </span>
     </div>
 
@@ -47,34 +47,40 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">srrjitter</span><span class="op">(</span><span class="va">fit</span>, steps <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">srrjitter</span><span class="op">(</span><span class="va">fit</span>, steps <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>fit</dt>
 <dd><p>fit of srrTBM()</p></dd>
+
+
 <dt>steps</dt>
 <dd><p>number of jitter steps</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>list</p>
+    
+
+<p>list</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">hs</span> <span class="op">=</span> <span class="fu"><a href="srrTMB.html">srrTMB</a></span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">segreg</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span>,lplim<span class="op">=</span><span class="fl">0.07</span>,uplim<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="plotsrs.html">plotsrs</a></span><span class="op">(</span><span class="va">hs</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">hs</span> <span class="op">=</span> <span class="fu"><a href="srrTMB.html">srrTMB</a></span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">segreg</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span>,lplim<span class="op">=</span><span class="fl">0.07</span>,uplim<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="plotsrs.html">plotsrs</a></span><span class="op">(</span><span class="va">hs</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="srrjitter-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="va">jitter</span> <span class="op">=</span> <span class="fu">srrjitter</span><span class="op">(</span><span class="va">hs</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="plotsrs.html">plotsrs</a></span><span class="op">(</span><span class="va">jitter</span><span class="op">$</span><span class="va">groups</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">jitter</span> <span class="op">=</span> <span class="fu">srrjitter</span><span class="op">(</span><span class="va">hs</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>NaNs produced</span>
+<span class="r-in"><span><span class="fu"><a href="plotsrs.html">plotsrs</a></span><span class="op">(</span><span class="va">jitter</span><span class="op">$</span><span class="va">groups</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="srrjitter-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="fu"><a href="plotsrs.html">plotsrs</a></span><span class="op">(</span><span class="va">jitter</span><span class="op">$</span><span class="va">best</span><span class="op">)</span> <span class="co"># Best</span></span>
+<span class="r-in"><span><span class="fu"><a href="plotsrs.html">plotsrs</a></span><span class="op">(</span><span class="va">jitter</span><span class="op">$</span><span class="va">best</span><span class="op">)</span> <span class="co"># Best</span></span></span>
 <span class="r-plt img"><img src="srrjitter-3.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="co"># Relax lower bound</span></span>
-<span class="r-in"><span class="fu"><a href="plotsrs.html">plotsrs</a></span><span class="op">(</span><span class="fu">FLSRs</span><span class="op">(</span>init<span class="op">=</span><span class="va">hs</span>,best<span class="op">=</span><span class="va">jitter</span><span class="op">$</span><span class="va">best</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co"># Relax lower bound</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="plotsrs.html">plotsrs</a></span><span class="op">(</span><span class="fu">FLSRs</span><span class="op">(</span>init<span class="op">=</span><span class="va">hs</span>,best<span class="op">=</span><span class="va">jitter</span><span class="op">$</span><span class="va">best</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="srrjitter-4.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
@@ -90,7 +96,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FLSRTMB</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.3</span>
       </span>
     </div>
 
@@ -47,34 +47,37 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plotsrts</span><span class="op">(</span><span class="va">object</span>, relative <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plotsrts</span><span class="op">(</span><span class="va">object</span>, relative <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>object</dt>
 <dd><p>Input FLSR of FLSRs object</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>ggplot</p>
+    
+
+<p>ggplot</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">bh</span> <span class="op">&lt;-</span> <span class="fu"><a href="srrTMB.html">srrTMB</a></span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">bevholtSV</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">plotsrts</span><span class="op">(</span><span class="va">bh</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">bh</span> <span class="op">&lt;-</span> <span class="fu"><a href="srrTMB.html">srrTMB</a></span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">bevholtSV</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">plotsrts</span><span class="op">(</span><span class="va">bh</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plotsrts-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="co"># Try more models</span></span>
-<span class="r-in"><span class="va">hs</span> <span class="op">&lt;-</span> <span class="fu"><a href="srrTMB.html">srrTMB</a></span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">segreg</span><span class="op">)</span>,spr0<span class="op">=</span><span class="op">(</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span><span class="op">)</span>,plim<span class="op">=</span><span class="fl">0.05</span>,pmax<span class="op">=</span><span class="fl">0.2</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">ri</span> <span class="op">&lt;-</span> <span class="fu"><a href="srrTMB.html">srrTMB</a></span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">rickerSV</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">bh.tv</span> <span class="op">&lt;-</span> <span class="fu"><a href="srrTMB.html">srrTMB</a></span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">bevholtSV</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">ri.tv</span> <span class="op">&lt;-</span> <span class="fu"><a href="srrTMB.html">srrTMB</a></span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">rickerSV</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">all</span><span class="op">=</span> <span class="fu">FLSRs</span><span class="op">(</span>hs<span class="op">=</span><span class="va">hs</span>,bh<span class="op">=</span><span class="va">bh</span>,ri<span class="op">=</span><span class="va">ri</span>,bh.tv<span class="op">=</span><span class="va">bh.tv</span>,ri.tv<span class="op">=</span><span class="va">ri.tv</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">plotsrts</span><span class="op">(</span><span class="va">all</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co"># Try more models</span></span></span>
+<span class="r-in"><span><span class="va">hs</span> <span class="op">&lt;-</span> <span class="fu"><a href="srrTMB.html">srrTMB</a></span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">segreg</span><span class="op">)</span>,spr0<span class="op">=</span><span class="op">(</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span><span class="op">)</span>,plim<span class="op">=</span><span class="fl">0.05</span>,pmax<span class="op">=</span><span class="fl">0.2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ri</span> <span class="op">&lt;-</span> <span class="fu"><a href="srrTMB.html">srrTMB</a></span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">rickerSV</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">bh.tv</span> <span class="op">&lt;-</span> <span class="fu"><a href="srrTMB.html">srrTMB</a></span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">bevholtSV</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ri.tv</span> <span class="op">&lt;-</span> <span class="fu"><a href="srrTMB.html">srrTMB</a></span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">rickerSV</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">all</span><span class="op">=</span> <span class="fu">FLSRs</span><span class="op">(</span>hs<span class="op">=</span><span class="va">hs</span>,bh<span class="op">=</span><span class="va">bh</span>,ri<span class="op">=</span><span class="va">ri</span>,bh.tv<span class="op">=</span><span class="va">bh.tv</span>,ri.tv<span class="op">=</span><span class="va">ri.tv</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">plotsrts</span><span class="op">(</span><span class="va">all</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plotsrts-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">c</span>,<span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">all</span>,<span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="co"># AIC</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">c</span>,<span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">all</span>,<span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="co"># AIC</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       hs       bh       ri    bh.tv    ri.tv </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 89.81315 86.84334 89.09788 87.37908 93.09520 </span>
 </code></pre></div>
@@ -91,7 +94,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

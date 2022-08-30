@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FLSRTMB</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.3</span>
       </span>
     </div>
 
@@ -47,24 +47,25 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">srrTMB</span><span class="op">(</span>
-  <span class="va">object</span>,
-  spr0 <span class="op">=</span> <span class="st">"missing"</span>,
-  s <span class="op">=</span> <span class="cn">NULL</span>,
-  s.est <span class="op">=</span> <span class="cn">TRUE</span>,
-  s.logitsd <span class="op">=</span> <span class="fl">20</span>,
-  lplim <span class="op">=</span> <span class="fl">0.001</span>,
-  uplim <span class="op">=</span> <span class="fl">0.3</span>,
-  plim <span class="op">=</span> <span class="va">lplim</span>,
-  pmax <span class="op">=</span> <span class="va">uplim</span>,
-  nyears <span class="op">=</span> <span class="cn">NULL</span>,
-  report.sR0 <span class="op">=</span> <span class="cn">FALSE</span>,
-  inits <span class="op">=</span> <span class="cn">NULL</span>,
-  lower <span class="op">=</span> <span class="cn">NULL</span>,
-  upper <span class="op">=</span> <span class="cn">NULL</span>,
-  SDreport <span class="op">=</span> <span class="cn">TRUE</span>,
-  verbose <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">srrTMB</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  spr0 <span class="op">=</span> <span class="st">"missing"</span>,</span>
+<span>  s <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  s.est <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  s.logitsd <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  r0.pr <span class="op">=</span> <span class="st">"missing"</span>,</span>
+<span>  lplim <span class="op">=</span> <span class="fl">0.001</span>,</span>
+<span>  uplim <span class="op">=</span> <span class="fl">0.3</span>,</span>
+<span>  plim <span class="op">=</span> <span class="va">lplim</span>,</span>
+<span>  pmax <span class="op">=</span> <span class="va">uplim</span>,</span>
+<span>  nyears <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  report.sR0 <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  inits <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lower <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  upper <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  SDreport <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -75,62 +76,101 @@
 <li><p>segreg</p></li>
 <li><p>geomean</p></li>
 </ul></dd>
+
+
 <dt>spr0</dt>
 <dd><p>unfished spawning biomass per recruit from FLCore::spr0(FLStock)</p></dd>
+
+
 <dt>s</dt>
 <dd><p>steepness parameter of SRR (fixed or prior mean)</p></dd>
+
+
 <dt>s.est</dt>
 <dd><p>option to estimate steepness</p></dd>
+
+
 <dt>s.logitsd</dt>
 <dd><p>prior sd for logit(s), default is 1.4 (flat) if s.est = TRUE</p></dd>
+
+
+<dt>r0.pr</dt>
+<dd><p>option to condition models on r0 priors (NULL = geomean)</p></dd>
+
+
 <dt>lplim</dt>
 <dd><p>lower bound of spawning ratio potential SRP, default 0.0001</p></dd>
+
+
 <dt>uplim</dt>
 <dd><p>upper bound of plausible spawning ratio potential SRP , default 0.3</p></dd>
+
+
 <dt>plim</dt>
 <dd><p>depreciated plim = usrp</p></dd>
+
+
 <dt>pmax</dt>
 <dd><p>depreciated pmax = lsrp</p></dd>
+
+
 <dt>nyears</dt>
 <dd><p>yearMeans from the tail used to compute a,b from the reference spr0 (default all years)</p></dd>
+
+
 <dt>report.sR0</dt>
 <dd><p>option to report s and R0 instead of a,b</p></dd>
+
+
 <dt>inits</dt>
 <dd><p>option to specify initial values of log(r0), log(SigR) and logit(s)</p></dd>
+
+
 <dt>lower</dt>
 <dd><p>option to specify lower bounds of log(r0), log(SigR) and logit(s)</p></dd>
+
+
 <dt>upper</dt>
 <dd><p>option to specify upper bounds of log(r0), log(SigR) and logit(s)</p></dd>
+
+
 <dt>SDreport</dt>
 <dd><p>option to converge hessian and get vcov</p></dd>
+
+
 <dt>verbose</dt>
 <dd><p>if TRUE, it shows tracing</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list containing elements 'FLSR', of class <em>FLSR</em></p>
+    
+
+<p>A list containing elements 'FLSR', of class <em>FLSR</em></p>
+
+
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">gm</span> <span class="op">&lt;-</span> <span class="fu">srrTMB</span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">geomean</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">bh</span> <span class="op">&lt;-</span> <span class="fu">srrTMB</span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">bevholtSV</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">ri</span> <span class="op">&lt;-</span> <span class="fu">srrTMB</span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">rickerSV</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">hs</span> <span class="op">&lt;-</span> <span class="fu">srrTMB</span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">segreg</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span>,lplim<span class="op">=</span><span class="fl">0.05</span>,uplim<span class="op">=</span><span class="fl">0.2</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">srs</span> <span class="op">=</span> <span class="fu">FLSRs</span><span class="op">(</span>gm<span class="op">=</span><span class="va">gm</span>,bh<span class="op">=</span><span class="va">bh</span>,ri<span class="op">=</span><span class="va">ri</span>,hs<span class="op">=</span><span class="va">hs</span><span class="op">)</span> <span class="co"># combine</span></span>
-<span class="r-in"><span class="fu"><a href="plotsrs.html">plotsrs</a></span><span class="op">(</span><span class="va">srs</span><span class="op">)</span> </span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">gm</span> <span class="op">&lt;-</span> <span class="fu">srrTMB</span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">geomean</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">bh</span> <span class="op">&lt;-</span> <span class="fu">srrTMB</span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">bevholtSV</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ri</span> <span class="op">&lt;-</span> <span class="fu">srrTMB</span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">rickerSV</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">hs</span> <span class="op">&lt;-</span> <span class="fu">srrTMB</span><span class="op">(</span><span class="fu">as.FLSR</span><span class="op">(</span><span class="va">ple4</span>,model<span class="op">=</span><span class="va">segreg</span><span class="op">)</span>,spr0<span class="op">=</span><span class="fu"><a href="spr0y.html">spr0y</a></span><span class="op">(</span><span class="va">ple4</span><span class="op">)</span>,lplim<span class="op">=</span><span class="fl">0.05</span>,uplim<span class="op">=</span><span class="fl">0.2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">srs</span> <span class="op">=</span> <span class="fu">FLSRs</span><span class="op">(</span>gm<span class="op">=</span><span class="va">gm</span>,bh<span class="op">=</span><span class="va">bh</span>,ri<span class="op">=</span><span class="va">ri</span>,hs<span class="op">=</span><span class="va">hs</span><span class="op">)</span> <span class="co"># combine</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="plotsrs.html">plotsrs</a></span><span class="op">(</span><span class="va">srs</span><span class="op">)</span> </span></span>
 <span class="r-plt img"><img src="srrTMB-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="fu"><a href="plotsrts.html">plotsrts</a></span><span class="op">(</span><span class="va">srs</span><span class="op">)</span>  <span class="co"># relative</span></span>
+<span class="r-in"><span><span class="fu"><a href="plotsrts.html">plotsrts</a></span><span class="op">(</span><span class="va">srs</span><span class="op">)</span>  <span class="co"># relative</span></span></span>
 <span class="r-plt img"><img src="srrTMB-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="fu"><a href="plotsrs.html">plotsrs</a></span><span class="op">(</span><span class="va">srs</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,b0<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> <span class="co"># through to B0</span></span>
+<span class="r-in"><span><span class="fu"><a href="plotsrs.html">plotsrs</a></span><span class="op">(</span><span class="va">srs</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,b0<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> <span class="co"># through to B0</span></span></span>
 <span class="r-plt img"><img src="srrTMB-3.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="fu"><a href="plotsrs.html">plotsrs</a></span><span class="op">(</span><span class="va">srs</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,b0<span class="op">=</span><span class="cn">TRUE</span>,rel<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>  <span class="co"># relative</span></span>
+<span class="r-in"><span><span class="fu"><a href="plotsrs.html">plotsrs</a></span><span class="op">(</span><span class="va">srs</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,b0<span class="op">=</span><span class="cn">TRUE</span>,rel<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>  <span class="co"># relative</span></span></span>
 <span class="r-plt img"><img src="srrTMB-4.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="va">gm</span><span class="op">@</span><span class="va">SV</span> <span class="co"># estimates</span></span>
+<span class="r-in"><span><span class="va">gm</span><span class="op">@</span><span class="va">SV</span> <span class="co"># estimates</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    s    sigmaR       R0       rho      B0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 NA 0.4827602 991110.1 0.4088983 5020664</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>,<span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">srs</span>,<span class="va">AIC</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>,<span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">srs</span>,<span class="va">AIC</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        [,1]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> gm 85.87597</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> bh 87.37908</span>
@@ -150,7 +190,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>
