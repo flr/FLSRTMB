@@ -46,7 +46,7 @@ spr0y<-function(object,byage=FALSE){
 
 
 
-#' spr0y()
+#' sprFy()
 #'
 #' Function to compute annual sprF as function of F_a
 #' @param object class FLStock

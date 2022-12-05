@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{sprFy}
 \alias{sprFy}
-\title{spr0y()}
+\title{sprFy()}
 \usage{
 sprFy(object, byage = FALSE)
 }
