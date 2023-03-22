@@ -47,7 +47,7 @@ spr0y<-function(object,byage=FALSE){
 
 
 
-#' spr0y()
+#' sprFy()
 #'
 #' Function to compute annual sprF as function of F_a
 #' @param object class FLStock
@@ -56,6 +56,7 @@ spr0y<-function(object,byage=FALSE){
 #' @export
 #' @author Henning Winker and Laurence Kell 
 sprFy = function(object,byage = FALSE){
+  object = object[,,1]
   survivors = exp(-apply(m(object)+harvest(object), 2, cumsum))
   survivors[-1] = survivors[-dim(survivors)[1]]
   survivors[1] = 1

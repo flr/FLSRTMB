@@ -66,7 +66,7 @@ run = 1:steps
 
 igroup=NULL 
 for(i in 1:length(unique(group))){
-  igroup=c(igroup,run[group%in%i][LL[group%in%i]==min(LL[group%in%i])][1])
+  igroup=c(igroup,run[group%in%i][LL[group%in%i]==max(LL[group%in%i])][1])
 }
 
 if(model=="segreg"){
