@@ -31,7 +31,8 @@ to_logits <- function(s,ll=0.2,ul=1){
 #' @export
 #' @author Laurence Kell
 spr0y<-function(object,byage=FALSE){
-  survivors=exp(-apply(m(object),2,cumsum))
+
+  survivors=exp(-apply(m(object),2:6,cumsum))
   survivors[-1]=survivors[-dim(survivors)[1]]
   survivors[1]=1
   expZ=exp(-m(object[dim(m(object))[1]]))
