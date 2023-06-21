@@ -92,7 +92,6 @@ res = list(init=init,best=best,groups=groups,jitter=out)
 return(res)
 } # }}}
 
-
 # plotjitter {{{
 #' plots Jitter results
 #'

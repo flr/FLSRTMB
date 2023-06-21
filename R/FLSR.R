@@ -9,7 +9,7 @@
 
 # srrTMB {{{
 
-#' Fits Stock Recruitment Relationships (SRR) in TBM
+#' Fits Stock Recruitment Relationships (SRR) in TMB
 #'
 #' @param object Input FLSR = as.FLSR(stock,model) object with current model options
 #' \itemize{
@@ -51,8 +51,24 @@
 #' gm@SV # estimates
 #' do.call(rbind,lapply(srs,AIC))
 
-srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=20,r0.pr="missing",lplim=0.001,uplim=0.3,plim=lplim,pmax=uplim,nyears=NULL,report.sR0=FALSE,inits=NULL, lower=NULL, upper=NULL,
-                   SDreport=TRUE,verbose=FALSE) {
+setGeneric("srrTMB", function(object, ...) standardGeneric("srrTMB"))
+
+#' @rdname srrTMB
+
+setMethod("srrTMB", signature(object="FLSRs"),
+  function(object, ...) {
+    lapply(object, srrTMB, ...)
+  }
+)
+
+#' @rdname srrTMB
+
+setMethod("srrTMB", signature(object="FLSR"),
+  function(object, spr0="missing",
+  s=NULL, s.est=TRUE, s.logitsd=20, r0.pr="missing",
+  lplim=0.001, uplim=0.3, plim=lplim, pmax=uplim,
+  nyears=NULL, report.sR0=FALSE, inits=NULL,
+  lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE) {
   
   silent = ifelse(verbose,1,0)
   
@@ -71,16 +87,16 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=20,r0.pr
     if(missing(spr0)){
       spr0 = 1
       gmB0 = FALSE}
-    if(verbose) cat("spr0 missing for computing B0","\n")
+    if(verbose) warning("spr0 missing for computing B0","\n")
   }
   if(!model=="mean"){
     if(missing(spr0)){
-      stop(paste("Required to specify spr0 for model",model))}}
+      stop(paste("Required to specify spr0 for model", model))}}
   
   # check 
   if(model%in%c("bevholt","ricker"))
-    stop(paste0("Please use ",model,"SV instead"))
-  
+    model <- paste0(model, "SV")
+ 
   if(!model%in%c("mean","segreg","bevholtSV","rickerSV"))
     stop(paste("S-R model:",model,"is not (yet) defined in FLSRTMB"))
   
@@ -94,8 +110,6 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=20,r0.pr
   
   spr0.yr = c(spr0.yr)
   spr0ref = mean(spr0.yr[(length(spr0.yr)-nyears+1):(length(spr0.yr))])
-  
-  
   
   if(model=="segreg"){ # Adjust dynamically
     ll =plim/pmax
@@ -116,11 +130,9 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=20,r0.pr
     if(is.null(s)& !s.est){s=0.7}
   }
   
-  
   # GET rec, ssb
   rec <- c(rec(object))
   ssb <- c(ssb(object))
-  
   
   # Simple geomean option with time-varying spr0y
   if(model=="mean"){
@@ -275,3 +287,4 @@ srrTMB <- function(object, spr0="missing", s=NULL, s.est=TRUE,s.logitsd=20,r0.pr
   
   return(object)
 }
+)

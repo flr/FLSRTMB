@@ -6,3 +6,4 @@ import("FLCore")
 
 exportPattern("^[[:alpha:]]+")
 
+exportMethods("srrTMB")
