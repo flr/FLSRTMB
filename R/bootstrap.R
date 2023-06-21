@@ -30,7 +30,7 @@
 #' data(ple4)
 #' bootstrapSR(ple4, iter=50, model=c("bevholt", "segreg"))
 
-bootstrapSR <- function(x, iters=100, method=c("best", "rejection"),
+bootstrapSR <- function(x, iters=100, method=c("best", "probability"),
   models=c("bevholt", "ricker", "segreg"), verbose=TRUE, ...) {
 
   # COMPUTE average of spr0 by year
@@ -73,7 +73,7 @@ bootstrapSR <- function(x, iters=100, method=c("best", "rejection"),
     llkhds <- unlist(lapply(fits, 'logLik'))
 
     # FIND BEST model
-    if(method == "rejection") {
+    if(method == "probability") {
       probs <- llkhds / sum(llkhds)
       u <- runif(1, 0, 1)
       best <- fits[[which(u <= cumsum(probs))[1]]]
