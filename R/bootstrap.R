@@ -30,7 +30,7 @@
 #' data(ple4)
 #' bootstrapSR(ple4, iter=50, model=c("bevholt", "segreg"))
 
-bootstrapSR <- function(x, iters=100,
+bootstrapSR <- function(x, iters=100, method=c("best", "rejection"),
   models=c("bevholt", "ricker", "segreg"), verbose=TRUE, ...) {
 
   # COMPUTE average of spr0 by year
@@ -48,6 +48,8 @@ bootstrapSR <- function(x, iters=100,
 
   # MATCH with those in FLSRTMB
   mod <- list(bevholt=bevholtSV, ricker=rickerSV, segreg=segreg)[models]
+
+  method <- match.arg(method)
 
   # BOOTSTRAP
 
@@ -71,12 +73,19 @@ bootstrapSR <- function(x, iters=100,
     llkhds <- unlist(lapply(fits, 'logLik'))
 
     # FIND BEST model
-    best <- fits[[which.max(llkhds)]]
+    if(method == "rejection") {
+      probs <- llkhds / sum(llkhds)
+      u <- runif(1, 0, 1)
+      best <- fits[[which(u <= cumsum(probs))[1]]]
+      }
+    else if (method == "best") {
+      best <- fits[[which.max(llkhds)]]
+    }
 
     # MATCH models: bevholt=1, ricker=2, segreg=3
     m <- match(models[which.max(llkhds)], c("bevholt", "ricker", "segreg"))
 
-    rbind(params(best), FLPar(m=m), FLPar(attr(best, 'SV')))
+    rbind(params(best), FLPar(m=m, spr0=spr0x), FLPar(attr(best, 'SV')))
   }
 
   # COMBINE along iters
