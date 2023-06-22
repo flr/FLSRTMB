@@ -94,3 +94,67 @@ bootstrapSR <- function(x, iters=100, method=c("best", "probability"),
   return(params)
 }
 # }}}
+
+# plot_bootstrapSR {{{
+
+plot_bootstrapSR <- function(fits, params) {
+
+  it <- dims(params)$iter
+
+  # CREATE ssb vector for range
+  ssbs <- FLQuant(seq(1, max(ssb(fits[[1]])), length=100),
+    dim=c(1, 100, 1, 1, 1, it))
+
+  # PREDICT rec at ssbs 
+  recs <- FLCore:::mixed(params$a, params$b, params$m, ssb=ssbs)
+
+  # ADD error
+  recs <- exp(log(recs) + rnorm(it, recs %=% 0, sd=(c(srpars$sigmaR))))
+
+  # CREATE df for plotting
+  dat <- model.frame(FLQuants(rec=recs, ssb=ssbs), drop=TRUE)
+
+  # CREATE quantiles df
+  qdat <- subset(dat, iter == 1)
+
+  qdat$q05 <- tapply(dat$rec, dat$ssb, FUN = function(x)
+    quantile(x, prob = 0.05), simplify = TRUE)
+  qdat$q50 <- tapply(dat$rec, dat$ssb, FUN = function(x)
+    quantile(x, prob = 0.50), simplify = TRUE)
+  qdat$q95 <- tapply(dat$rec, dat$ssb, FUN = function(x)
+    quantile(x, prob = 0.95), simplify = TRUE)
+
+  # DROP extreme values
+  dat <- subset(dat, rec <= max(rec(run)) * 1.5)
+
+  # PLOT fits
+  plotsrs(fits[c("bevholt", "segreg")]) +
+    annotate("text", x=-Inf, y=Inf, hjust = -0.2, vjust = 1.5,
+      label=.table_srmodels(srpars)) +
+    # QUANTILE smoothers
+    geom_smooth(data=qdat, aes(y=q50),
+      colour="black", fill=NA, linewidth=0.5,
+      method='loess', formula=y~x, se=FALSE) +
+    geom_smooth(data=qdat, aes(y=q05),
+      colour="black", fill=NA, linewidth=0.5, linetype=2,
+      method='loess', formula=y~x, se=FALSE) +
+    geom_smooth(data=qdat, aes(y=q95),
+      colour="black", fill=NA, linewidth=0.5, linetype=2,
+      method='loess', formula=y~x, se=FALSE) -
+    # POINTS
+    geom_point(data=dat, aes(x=jitter(ssb, 2), rec), 
+      colour="gray", fill="white", alpha=0.1, size=0.5) +
+    theme(legend.position="none")
+}
+# }}}
+
+# .table_srmodels {{{
+.table_srmodels <- function(x) {
+
+  tab <- table(x$m)
+  mod <- c("Bevholt:", "Ricker:", "Segreg:")[as.numeric(names(tab))]
+  val <- round(c(tab) / sum(tab), 2)
+
+  paste(mod, val, collapse="\n")
+}
+# }}}
