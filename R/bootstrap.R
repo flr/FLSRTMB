@@ -30,7 +30,7 @@
 #' data(ple4)
 #' bootstrapSR(ple4, iter=50, model=c("bevholt", "segreg"))
 
-bootstrapSR <- function(x, iters=100, method=c("best", "probability"),
+bootstrapSR <- function(x, iters=100, method=c("best", "loglik", "aic"),
   models=c("bevholt", "ricker", "segreg"), verbose=TRUE, ...) {
 
   # COMPUTE average of spr0 by year
@@ -70,22 +70,38 @@ bootstrapSR <- function(x, iters=100, method=c("best", "probability"),
     if(verbose)
       p(message = sprintf(paste0("[", i, "]")))
 
-    llkhds <- unlist(lapply(fits, 'logLik'))
+    # COMPUTE LogLik and AIC across fits
 
-    # FIND BEST model
-    if(method == "probability") {
+    llkhds <- unlist(lapply(fits, 'logLik'))
+    aics <- unlist(lapply(fits, 'AIC'))
+    
+    # - FIND BEST model
+
+    # best: largest logLik
+    if (method == "best") {
+      best <- which.max(llkhds)
+    # logLik
+    } else if(method == "loglik") {
       probs <- llkhds / sum(llkhds)
       u <- runif(1, 0, 1)
-      best <- fits[[which(u <= cumsum(probs))[1]]]
-      }
-    else if (method == "best") {
-      best <- fits[[which.max(llkhds)]]
+      best <- which(u <= cumsum(probs))[1]
+    # aic: relative likelihood from AIC
+    } else if(method == "aic") {
+      daic <- aics - min(aics)
+      relkhd <- exp(-0.5 * daic)
+      aicw <- relkhd / sum(relkhd)
+      u <- runif(1, 0, 1)
+      best <- which(u <= cumsum(aicw))[1]
     }
-
+    
     # MATCH models: bevholt=1, ricker=2, segreg=3
-    m <- match(models[which.max(llkhds)], c("bevholt", "ricker", "segreg"))
+    m <- match(models[best], c("bevholt", "ricker", "segreg"))
 
-    rbind(params(best), FLPar(m=m, spr0=spr0x), FLPar(attr(best, 'SV')))
+    fit <- fits[[best]]
+
+    # RETURN: params, model, spr0, logLik, SR fit params
+    rbind(params(fit), FLPar(m=m, spr0=spr0x, logLik=llkhds[best]),
+      FLPar(attr(fit, 'SV')))
   }
 
   # COMBINE along iters
@@ -106,10 +122,16 @@ plot_bootstrapSR <- function(fits, params) {
     dim=c(1, 100, 1, 1, 1, it))
 
   # PREDICT rec at ssbs 
-  recs <- FLCore:::mixed(params$a, params$b, params$m, ssb=ssbs)
+  # recs <- FLCore:::mixed(params$a, params$b, params$m, ssb=ssbs)
+
+  recs <- Reduce(combine, lapply(1:500, function(i)
+    FLCore:::mixed(iter(params, i)$a, iter(params, i)$b, iter(params, i)$m,
+      ssb=iter(ssbs,i))
+    ))
 
   # ADD error
-  recs <- exp(log(recs) + rnorm(it, recs %=% 0, sd=(c(srpars$sigmaR))))
+  recs <- exp(log(recs) + rnorm(it, recs %=% 0, sd=(c(params$sigmaR))) -
+    (0.5 * c(params$sigmaR) ^ 2))
 
   # CREATE df for plotting
   dat <- model.frame(FLQuants(rec=recs, ssb=ssbs), drop=TRUE)
@@ -125,12 +147,12 @@ plot_bootstrapSR <- function(fits, params) {
     quantile(x, prob = 0.95), simplify = TRUE)
 
   # DROP extreme values
-  dat <- subset(dat, rec <= max(rec(run)) * 1.5)
+  dat <- subset(dat, rec <= max(rec(run)) * 1.25)
 
   # PLOT fits
-  plotsrs(fits[c("bevholt", "segreg")]) +
+  plotsrs(fits) +
     annotate("text", x=-Inf, y=Inf, hjust = -0.2, vjust = 1.5,
-      label=.table_srmodels(srpars)) +
+      label=.table_srmodels(params)) +
     # QUANTILE smoothers
     geom_smooth(data=qdat, aes(y=q50),
       colour="black", fill=NA, linewidth=0.5,
@@ -144,7 +166,9 @@ plot_bootstrapSR <- function(fits, params) {
     # POINTS
     geom_point(data=dat, aes(x=jitter(ssb, 2), rec), 
       colour="gray", fill="white", alpha=0.1, size=0.5) +
-    theme(legend.position="none")
+    theme(legend.position="none") +
+    scale_x_continuous(labels = comma) +
+    scale_y_continuous(labels = scientific)
 }
 # }}}
 
