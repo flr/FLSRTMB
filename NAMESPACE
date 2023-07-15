@@ -3,6 +3,8 @@ useDynLib(FLSRTMB)
 
 import("TMB")
 import("FLCore")
+importFrom("progressr",
+  "progressor")
 
 exportPattern("^[[:alpha:]]+")
 

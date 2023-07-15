@@ -1,6 +1,6 @@
 Package: FLSRTMB
 Title: FLSR in TMB
-Version: 1.1.4.9005
+Version: 1.1.4.9006
 Authors@R: 
  c(
    person("Henning", "Winker", email = "henning.winker@ec.europa.eu",
@@ -21,7 +21,8 @@ Depends:
   ggplot2,
   ggplotFL
 Imports: 
-  TMB (>= 1.7.19)
+  TMB (>= 1.7.19),
+  progressr
 LinkingTo: 
   TMB,
   RcppEigen

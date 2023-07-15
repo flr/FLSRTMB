@@ -30,7 +30,7 @@
 #' data(ple4)
 #' bootstrapSR(ple4, iter=50, model=c("bevholt", "segreg"))
 
-bootstrapSR <- function(x, iters=100, method=c("best", "loglik", "aic"),
+bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
   models=c("bevholt", "ricker", "segreg"), verbose=TRUE, ...) {
 
   # COMPUTE average of spr0 by year
@@ -86,7 +86,7 @@ bootstrapSR <- function(x, iters=100, method=c("best", "loglik", "aic"),
       u <- runif(1, 0, 1)
       best <- which(u <= cumsum(probs))[1]
     # aic: relative likelihood from AIC
-    } else if(method == "aic") {
+    } else if(method == "relative") {
       daic <- aics - min(aics)
       relkhd <- exp(-0.5 * daic)
       aicw <- relkhd / sum(relkhd)
@@ -147,7 +147,7 @@ plot_bootstrapSR <- function(fits, params) {
     quantile(x, prob = 0.95), simplify = TRUE)
 
   # DROP extreme values
-  dat <- subset(dat, rec <= max(rec(run)) * 1.25)
+  dat <- subset(dat, rec <= max(rec(fits[[1]])) * 1.25)
 
   # PLOT fits
   plotsrs(fits) +
