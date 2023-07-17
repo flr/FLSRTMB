@@ -6,6 +6,8 @@
 #
 # Distributed under the terms of the EUPL-1.2
 
+options(doFuture.rng.onMisuse = "ignore")
+
 # bootstrapSR {{{
 
 #' Bootstrap fits of mutliple stock-recruits relationships
