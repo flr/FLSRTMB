@@ -2,9 +2,15 @@
 % Please edit documentation in R/FLSR.R
 \name{srrTMB}
 \alias{srrTMB}
-\title{Fits Stock Recruitment Relationships (SRR) in TBM}
+\alias{srrTMB,FLSRs-method}
+\alias{srrTMB,FLSR-method}
+\title{Fits Stock Recruitment Relationships (SRR) in TMB}
 \usage{
-srrTMB(
+srrTMB(object, ...)
+
+\S4method{srrTMB}{FLSRs}(object, ...)
+
+\S4method{srrTMB}{FLSR}(
   object,
   spr0 = "missing",
   s = NULL,
@@ -69,7 +75,7 @@ srrTMB(
 A list containing elements 'FLSR', of class \emph{FLSR}
 }
 \description{
-Fits Stock Recruitment Relationships (SRR) in TBM
+Fits Stock Recruitment Relationships (SRR) in TMB
 }
 \examples{
 data(ple4)

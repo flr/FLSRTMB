@@ -30,7 +30,7 @@ options(doFuture.rng.onMisuse = "ignore")
 #' @keywords models
 #' @examples
 #' data(ple4)
-#' bootstrapSR(ple4, iter=50, model=c("bevholt", "segreg"))
+#' mods <- bootstrapSR(ple4, iter=50, model=c("bevholt", "segreg"))
 
 bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
   models=c("bevholt", "ricker", "segreg"), verbose=TRUE, ...) {
@@ -57,7 +57,9 @@ bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
 
   p <- progressor(along=seq(iters), offset=1)
 
-  res <- foreach(i=seq(iters)) %dopar% {
+  res <- foreach(i=seq(iters),
+    .options.future=list(globals=structure(FALSE, add=c("x", "mod",
+    "method", "models", "spr0x")))) %dofuture% {
 
     y <- x
 

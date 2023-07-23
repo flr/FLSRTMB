@@ -3,6 +3,7 @@ useDynLib(FLSRTMB)
 
 import("TMB")
 import("FLCore")
+import("doFuture")
 importFrom("progressr",
   "progressor")
 
