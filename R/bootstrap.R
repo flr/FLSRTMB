@@ -6,7 +6,6 @@
 #
 # Distributed under the terms of the EUPL-1.2
 
-options(doFuture.rng.onMisuse = "ignore")
 
 # bootstrapSR {{{
 
@@ -59,7 +58,7 @@ bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
 
   res <- foreach(i=seq(iters),
     .options.future=list(globals=structure(FALSE, add=c("x", "mod",
-    "method", "models", "spr0x")))) %dofuture% {
+    "method", "models", "spr0x"), seed=TRUE))) %dofuture% {
 
     y <- x
 
