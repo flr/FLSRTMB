@@ -6,6 +6,9 @@ import("FLCore")
 import("doFuture")
 importFrom("progressr",
   "progressor")
+importFrom("scales",
+  "comma",
+  "scientific")
 
 exportPattern("^[[:alpha:]]+")
 

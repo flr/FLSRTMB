@@ -23,7 +23,8 @@ Depends:
   doFuture
 Imports: 
   TMB (>= 1.7.19),
-  progressr
+  progressr,
+  scales
 LinkingTo: 
   TMB,
   RcppEigen
