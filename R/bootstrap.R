@@ -60,8 +60,9 @@ bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
     message("Running on ", nbrOfWorkers(), " nodes.")
 
   res <- foreach(i=seq(iters),
-    .options.future=list(globals=structure(TRUE, add=c("x", "mod",
-    "method", "models", "spr0x"), seed=TRUE))) %dofuture% {
+    .options.future=list(globals=structure(TRUE, add=c("x", "id", "mod",
+    "spr0x", "method", "models", "logLik"), packages=c("FLCore"),
+    seed=TRUE))) %dofuture% {
 
     y <- x
 
