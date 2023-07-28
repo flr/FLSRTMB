@@ -55,9 +55,12 @@ bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
   # BOOTSTRAP
 
   p <- progressor(along=seq(iters), offset=1)
+  
+  if(nbrOfWorkers() > 1)
+    message("Running on ", nbrOfWorkers(), " nodes.")
 
   res <- foreach(i=seq(iters),
-    .options.future=list(globals=structure(FALSE, add=c("x", "mod",
+    .options.future=list(globals=structure(TRUE, add=c("x", "mod",
     "method", "models", "spr0x"), seed=TRUE))) %dofuture% {
 
     y <- x
