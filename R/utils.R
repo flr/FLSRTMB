@@ -30,21 +30,31 @@ to_logits <- function(s,ll=0.2,ul=1){
 #' @return FLQuant with annual spr0y  
 #' @export
 #' @author Laurence Kell
-spr0y<-function(object,byage=FALSE){
+spr0y <- function(object, byage=FALSE, simplify=TRUE){
 
-  survivors=exp(-apply(m(object),2:6,cumsum))
-  survivors[-1]=survivors[-dim(survivors)[1]]
-  survivors[1]=1
-  expZ=exp(-m(object[dim(m(object))[1]]))
+  # COMPUTE survivors from M
+  survivors <- exp(-apply(m(object), 2:6, cumsum))
+  survivors[-1, ] <- survivors[-dim(survivors)[1]]
+  survivors[1, ] <- 1
+
+  expZ <- exp(-m(object[dim(m(object))[1]]))
+
   if (!is.na(range(object)["plusgroup"]))
-    survivors[dim(m(object))[1]]=survivors[dim(m(object))[1]]*(-1.0/(expZ-1.0))
+    survivors[dim(m(object))[1]] <- survivors[dim(m(object))[1]] * 
+      (-1.0 / (expZ - 1.0))
   
-  fec=mat(object)*stock.wt(object)*exp(-m(object)*m.spwn(object))
+  fec <- mat(object) * stock.wt(object) * exp(-m(object) * m.spwn(object))
   
-  if(byage) rtn = fec * survivors
-  if(!byage) rtn =  apply(fec * survivors, 2, sum)
-  rtn}
+  rtn <- fec * survivors
 
+  if(!byage)
+    rtn <- unitSums(rtn)
+
+  if(simplify)
+    rtn <- areaSums(unitSums(quantSums(rtn)[,,,1]))
+
+  return(rtn)
+}
 
 
 #' sprFy()

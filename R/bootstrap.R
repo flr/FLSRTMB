@@ -131,7 +131,7 @@ plot_bootstrapSR <- function(fits, params) {
   # PREDICT rec at ssbs 
   # recs <- FLCore:::mixed(params$a, params$b, params$m, ssb=ssbs)
 
-  recs <- Reduce(combine, lapply(1:500, function(i)
+  recs <- Reduce(combine, lapply(seq(it), function(i)
     FLCore:::mixed(iter(params, i)$a, iter(params, i)$b, iter(params, i)$m,
       ssb=iter(ssbs,i))
     ))
