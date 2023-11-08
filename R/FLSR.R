@@ -68,12 +68,15 @@ setMethod("srrTMB", signature(object="FLSR"),
   s=NULL, s.est=TRUE, s.logitsd=20, r0.pr="missing",
   lplim=0.001, uplim=0.3, plim=lplim, pmax=uplim,
   nyears=NULL, report.sR0=FALSE, inits=NULL,
-  lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE) {
+  lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE,
+  d.type = c("None","A")) {
   
   silent = ifelse(verbose,1,0)
   
   s.inp = s
-  
+
+  d.type = match.arg(d.type)
+      
   if(is.null(nyears)) nyears = dim(ssb(object))[2]
   if(is.null(plim)){
     if(is.null(s)& s.est){ plim=0.01} else {plim=0.1}
@@ -199,9 +202,9 @@ setMethod("srrTMB", signature(object="FLSR"),
   
     
     if(is.null(lower))
-      lower <- c(min(log(rec)), log(0.05),-100)
+      lower <- c(min(log(rec)), log(0.05),-100,-10)
     if(is.null(upper))
-      upper <- c(max(log(rec * 20)), log(1.5),100)
+      upper <- c(max(log(rec * 20)), log(1.5),100,10)
     
     # SET TMB input
     inp <- list(
@@ -210,9 +213,10 @@ setMethod("srrTMB", signature(object="FLSR"),
                   spr0y = spr0.yr,spr0=spr0ref,plim=plim, nyears=length(ssb),slim=ll,smax=ul,
                   
                   # model
-                  Rmodel = which(model==c("bevholtSV","rickerSV","segreg"))-1),
+                  Rmodel = which(model==c("bevholtSV","rickerSV","segreg"))-1,
+                  depensationModel = which(d.type == c("None","A")) - 1),
       # inits
-      Params = list(log_r0 = inits[1], log_sigR = inits[2],logit_s=inits[3]),
+      Params = list(log_r0 = inits[1], log_sigR = inits[2],logit_s=inits[3], log_d = 0),
       # bounds
       lower=lower, upper=upper,
       #
@@ -220,7 +224,9 @@ setMethod("srrTMB", signature(object="FLSR"),
     )
     
     # Compile TMB inputs 
-    Map = list()
+      Map = list()
+      if(d.type == "None")
+          Map$log_d = factor(NA)
     # Turn off steepness estimation
     if(!s.est) Map[["logit_s"]] = factor( NA ) 
     
@@ -240,7 +246,8 @@ setMethod("srrTMB", signature(object="FLSR"),
     Report <- Obj$report()
     
     if(SDreport) {
-      SD <- try(TMB::sdreport(Obj))
+        SD <- try(TMB::sdreport(Obj))
+        attr(object,"SD") <- SD
     }
     
     # LOAD output in FLSR
@@ -268,9 +275,9 @@ setMethod("srrTMB", signature(object="FLSR"),
     
     
     if(model!="segreg"){
-      attr(object,"SV") = data.frame(s=Report$s,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref)
+      attr(object,"SV") = data.frame(s=Report$s,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref, d = ifelse(d.type=="None",NA,Report$d))
     } else{
-      attr(object,"SV") = data.frame(s=NA,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref)
+      attr(object,"SV") = data.frame(s=NA,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref, d = ifelse(d.type=="None",NA,Report$d))
       
     }
     
@@ -281,7 +288,7 @@ setMethod("srrTMB", signature(object="FLSR"),
   } # End TMB model
   
   attr(object,"settings") = list(s=s.inp,s.est=s.est,s.logitsd=s.logitsd,spr0=spr0,lplim=lplim,uplim=uplim,nyears=nyears,
-                                 inits=inits,lower=lower,upper=upper)
+                                 inits=inits,lower=lower,upper=upper,d.type=d.type)
   
   
   

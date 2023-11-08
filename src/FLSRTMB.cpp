@@ -25,15 +25,18 @@ Type objective_function<Type>::operator() () {
   DATA_SCALAR( slim ); 
   DATA_SCALAR( smax ); 
   DATA_INTEGER(Rmodel); // Recruitment model
+  DATA_INTEGER(depensationModel);
   
   // Parameters
   PARAMETER(log_r0);
   PARAMETER(log_sigR);
   PARAMETER(logit_s);
+  PARAMETER(log_d);
   // Derived quantities
   Type r0 = exp(log_r0);
   Type sigR = exp(log_sigR);
   Type sinit = slim+0.001 + (smax-slim-0.001)*1/(1+exp(-logit_s));
+  Type d = exp(log_d);
   
   vector<Type> log_rec_hat( nyears );
   vector<Type> vy = spr0y * r0;
@@ -49,7 +52,15 @@ Type objective_function<Type>::operator() () {
   if(Rmodel==0){ // bevholtSV()
     s = sinit;
     for( int t=0; t< nyears; t++){
-      log_rec_hat(t) = log(4.0 * s * r0 *ssb(t) / (vy(t)*(1.0-s)+ssb(t)*(5.0*s-1.0)));//-pow(sigR,2)/2.0;
+      // log_rec_hat(t) = log(4.0 * s * r0 *ssb(t) / (vy(t)*(1.0-s)+ssb(t)*(5.0*s-1.0)));//-pow(sigR,2)/2.0;
+      // Rescale SSB by point of 50% recruitment
+      Type rmaxx = 4.0 * s * r0 / (5.0 * s - 1.0);
+      Type s50x = vy(t) * (1 - s) / (5.0 * s - 1.0);
+      Type ssbx = ssb(t) / s50x;
+      if(depensationModel == 1){
+	ssbx = pow(ssbx, d);
+      }
+      log_rec_hat(t) = log(rmaxx / (1.0 + 1.0 / ssbx));
     }
   }
   
@@ -58,8 +69,14 @@ Type objective_function<Type>::operator() () {
       s = sinit; // removed *20
       b = log(5.0*s)/(0.8*vy(t));
       a = exp(b*vy(t))/spr0;
-      log_rec_hat(t) = log(a*ssb(t)*exp(-b*ssb(t)));
+      //log_rec_hat(t) = log(a*ssb(t)*exp(-b*ssb(t)));
       //log_rec_hat(t) = log(r0 * ssb(t) / v * exp(s*(1.0-ssb(t)/v)));
+      // Rescale SSB by point of maximum recruitment (1/b);
+      Type ssbx = ssb(t) * b;
+      if(depensationModel == 1){
+	ssbx = pow(ssbx, d);
+      }
+      log_rec_hat(t) = log(a / b * ssbx * exp(-ssbx));
     }
   }
   
@@ -67,7 +84,14 @@ Type objective_function<Type>::operator() () {
     for( int t=0; t< nyears; t++){
       s = sinit;
       //log_rec_hat(t) = log(r0)+log(2.5*s/v*(ssb(t)+0.2*v/s-pow(pow(ssb(t)-0.2*v/s,2.0),0.5)));//-pow(sigR,2)/2.0;
-      log_rec_hat(t) = log(r0)+log(0.5/plim*s/vy(t)*(ssb(t)+plim*vy(t)/s-pow(pow(ssb(t)-plim*vy(t)/s,2.0),0.5)));
+      // log_rec_hat(t) = log(r0)+log(0.5/plim*s/vy(t)*(ssb(t)+plim*vy(t)/s-pow(pow(ssb(t)-plim*vy(t)/s,2.0),0.5)));
+      // Re-parameterize to have breakpoint at 1 by scaling with breakpoint
+      Type ssbx = ssb(t) / (plim*vy(t)/s);
+      if(depensationModel == 1){ // Type A: R(S^d)
+	ssbx = pow(ssbx, d);
+      }
+      log_rec_hat(t) = log(r0) + log(0.5 * (ssbx + 1.0 - pow(pow(ssbx - 1.0, 2.0), 0.5)));
+
     }
   }
   
@@ -113,6 +137,7 @@ Type objective_function<Type>::operator() () {
   REPORT( a );
   REPORT( b );
   REPORT( s );
+  REPORT( d ) ;
   ADREPORT(log(a));
   ADREPORT( log(b));
   
