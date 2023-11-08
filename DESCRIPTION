@@ -1,13 +1,16 @@
 Package: FLSRTMB
 Title: FLSR in TMB
-Version: 1.1.4.9012
+Version: 1.1.4.9013
 Authors@R: 
  c(
    person("Henning", "Winker", email = "henning.winker@ec.europa.eu",
     role = c("aut", "cre")),
   person("European Union", role = c("fnd", "cph")),
   person("Iago", "Mosqueira", email = "iago.mosqueira@wur.nl",
-    role = c("aut"), comment = c(ORCID = "0000-0002-3252-0591"))
+    role = c("aut"), comment = c(ORCID = "0000-0002-3252-0591")),
+    person(c("Christoffer","Moesgaard"), "Albertsen",
+	   email = "cmoe@aqua.dtu.dk", role = c("ctb"),
+	   comment = c(ORCID = "0000-0003-0088-4363"))
  )
 Description: Estimates FLR spawner recruitment relationships in TMB
 X-schema.org-keywords: stock-recruit, fisheries, flr, R, TMB, AD
