@@ -19,6 +19,7 @@ srrTMB(object, ...)
   r0.pr = "missing",
   lplim = 0.001,
   uplim = 0.3,
+  Blim = "missing",
   plim = lplim,
   pmax = uplim,
   nyears = NULL,
@@ -34,6 +35,7 @@ srrTMB(object, ...)
 \item{object}{Input FLSR = as.FLSR(stock,model) object with current model options
 \itemize{
 \item bevholtSV
+\item bevholtDa
 \item rickerSV
 \item segreg
 \item geomean
@@ -52,6 +54,8 @@ srrTMB(object, ...)
 \item{lplim}{lower bound of spawning ratio potential SRP, default 0.0001}
 
 \item{uplim}{upper bound of plausible spawning ratio potential SRP , default 0.3}
+
+\item{Blim}{fixing Blim, only works with segreg}
 
 \item{plim}{depreciated plim = usrp}
 

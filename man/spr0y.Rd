@@ -4,7 +4,7 @@
 \alias{spr0y}
 \title{spr0y()}
 \usage{
-spr0y(object, byage = FALSE)
+spr0y(object, byage = FALSE, simplify = TRUE)
 }
 \arguments{
 \item{object}{class FLStock}

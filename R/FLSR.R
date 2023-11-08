@@ -26,6 +26,7 @@
 #' @param r0.pr option to condition models on r0 priors (NULL = geomean)
 #' @param lplim lower bound of spawning ratio potential SRP, default 0.0001
 #' @param uplim upper bound of plausible spawning ratio potential SRP , default 0.3
+#' @param Blim fixing Blim, only works with segreg
 #' @param plim depreciated plim = usrp
 #' @param pmax depreciated pmax = lsrp
 #' @param nyears yearMeans from the tail used to compute a,b from the reference spr0 (default all years)
@@ -67,7 +68,7 @@ setMethod("srrTMB", signature(object="FLSRs"),
 setMethod("srrTMB", signature(object="FLSR"),
   function(object, spr0="missing",
   s=NULL, s.est=TRUE, s.logitsd=20, r0.pr="missing",
-  lplim=0.001, uplim=0.3, plim=lplim, pmax=uplim,
+  lplim=0.001, uplim=0.3, Blim="missing", plim=lplim, pmax=uplim,
   nyears=NULL, report.sR0=FALSE, inits=NULL,
   lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE) {
   
@@ -85,6 +86,8 @@ setMethod("srrTMB", signature(object="FLSR"),
   
   # IDENTIFY model
   model <- SRModelName(model(object))
+  
+
   
   if(model=="mean"){
     gmB0 = TRUE
@@ -134,9 +137,38 @@ setMethod("srrTMB", signature(object="FLSR"),
     if(is.null(s)& !s.est){s=0.7}
   }
   
+  
+  
   # GET rec, ssb
   rec <- c(rec(object))
   ssb <- c(ssb(object))
+  
+  # Fixed Blim
+  if(!missing(Blim)){
+    if(model!="segreg"){
+      stop(paste("The fixed Blim option requires model=segreg"))}
+    
+    object <- fmle(object, fixed=list(b=Blim),
+                   method="Brent", lower=0.1, upper=max(rec(object)*1.5))
+    
+    # Add loglik manually (to learn)
+    p = 1
+    N = length(fitted(object))
+    sigma <- sqrt(sum(object@residuals^2)/(N-1))*sqrt((N-p)/N) # correct for p
+    attr(object@logLik,"df") = p+1
+    attr(object@logLik,"nobs") = length(fitted(object)) 
+    object@logLik[] =  sum(dnorm(0, mean=residuals(object), sd=sigma, log=TRUE))
+    #check logLik(gmfit)
+    object@vcov = matrix(0,nrow=1,dimnames = list(c("a"),c("a")))
+    
+    # AR1 rho
+    rho = stats::cor(residuals(object)[,-N],residuals(object)[,-1])
+    R0 = an(params(object)[1]*params(object)[2])
+    B0 = R0*spr0ref
+    attr(object,"SV") = data.frame(s=NA,sigmaR=sigma,R0=R0,rho=rho,B0=B0)
+    
+  } else {
+    
   
   # Simple geomean option with time-varying spr0y
   if(model=="mean"){
@@ -293,6 +325,7 @@ setMethod("srrTMB", signature(object="FLSR"),
       object@vcov = matrix(SD$cov,nrow=2,dimnames = list(c("a","b"),c("a","b")))
     }
   } # End TMB model
+  } # end Blim loop
   
   attr(object,"settings") = list(s=s.inp,s.est=s.est,s.logitsd=s.logitsd,spr0=spr0,lplim=lplim,uplim=uplim,nyears=nyears,
                                  inits=inits,lower=lower,upper=upper,d.type=d.type)
