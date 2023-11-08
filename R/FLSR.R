@@ -14,6 +14,7 @@
 #' @param object Input FLSR = as.FLSR(stock,model) object with current model options
 #' \itemize{
 #'   \item bevholtSV   
+#'   \item bevholtDa
 #'   \item rickerSV
 #'   \item segreg
 #'   \item geomean
@@ -68,15 +69,15 @@ setMethod("srrTMB", signature(object="FLSR"),
   s=NULL, s.est=TRUE, s.logitsd=20, r0.pr="missing",
   lplim=0.001, uplim=0.3, plim=lplim, pmax=uplim,
   nyears=NULL, report.sR0=FALSE, inits=NULL,
-  lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE,
-  d.type = c("None","A")) {
+  lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE) {
   
+  d.type = c("None")
+    
   silent = ifelse(verbose,1,0)
   
   s.inp = s
 
-  d.type = match.arg(d.type)
-      
+    
   if(is.null(nyears)) nyears = dim(ssb(object))[2]
   if(is.null(plim)){
     if(is.null(s)& s.est){ plim=0.01} else {plim=0.1}
@@ -100,7 +101,7 @@ setMethod("srrTMB", signature(object="FLSR"),
   if(model%in%c("bevholt","ricker"))
     model <- paste0(model, "SV")
  
-  if(!model%in%c("mean","segreg","bevholtSV","rickerSV"))
+  if(!model%in%c("mean","segreg","bevholtSV","rickerSV","bevholtDa"))
     stop(paste("S-R model:",model,"is not (yet) defined in FLSRTMB"))
   
   if(length(spr0)>1){
@@ -126,7 +127,7 @@ setMethod("srrTMB", signature(object="FLSR"),
     ul = 20
     s = mean(c(ll,ul))
   } 
-  if(model=="bevholtSV"){
+  if(model%in%c("bevholtSV","bevholtDa")){
     ll=0.2  
     ul = 1
     if(is.null(s)& s.est){s=mean(c(ll,ul))} # central value for s = 0.2-1.0
@@ -185,6 +186,8 @@ setMethod("srrTMB", signature(object="FLSR"),
       if(is.null(inits)) inits <- c(an(quantile(log(rec),0.4)), log(0.3),to_logits(sinit,ll=ll))
       #if(is.null(inits)) inits <- c(log(r0init), log(0.4),to_logits(s,lim=lim))
     } 
+    # ><> depensation
+    if(model=="bevholtDa") d.type = "A"
     
     if(is.null(inits)) inits <- c(log(r0init), log(0.3),to_logits(s,ll=ll,ul=ul))
     
@@ -205,15 +208,16 @@ setMethod("srrTMB", signature(object="FLSR"),
       lower <- c(min(log(rec)), log(0.05),-100,-10)
     if(is.null(upper))
       upper <- c(max(log(rec * 20)), log(1.5),100,10)
-    
-    # SET TMB input
+    # preliminary HACK for depensation model  
+     Rmod = ifelse(model=="bevholtDa","bevholtSV",model)
+     # SET TMB input
     inp <- list(
       # data
       Data = list(ssb = ssb, rec = rec,prior_s = c(to_logits(s,ll,ul),s.logitsd), prior_r0 = prior_r0,
                   spr0y = spr0.yr,spr0=spr0ref,plim=plim, nyears=length(ssb),slim=ll,smax=ul,
                   
                   # model
-                  Rmodel = which(model==c("bevholtSV","rickerSV","segreg"))-1,
+                  Rmodel = which(Rmod==c("bevholtSV","rickerSV","segreg"))-1,
                   depensationModel = which(d.type == c("None","A")) - 1),
       # inits
       Params = list(log_r0 = inits[1], log_sigR = inits[2],logit_s=inits[3], log_d = 0),
@@ -253,12 +257,15 @@ setMethod("srrTMB", signature(object="FLSR"),
     # LOAD output in FLSR
     
     # DEBUG HACK
-    model(object) <- switch(model, bevholtSV=bevholt, rickerSV=ricker,segreg=segreg)
+    model(object) <- switch(model, bevholtSV=bevholt, rickerSV=ricker,segreg=segreg,bevholtDa=bevholtDa)
     
     fitted(object) <- c(Report$rec_hat)
     residuals(object) <- log(rec(object)) - log(fitted(object))
     
-    params(object) <- FLPar(a=Report$a, b=Report$b)
+    params(object) <- FLPar(a=Report$a, b=Report$b,d=Report$d)
+    
+    if(d.type=="none") params(object) = params(object)[1:2] 
+    
     if(report.sR0) params(object) <- FLPar(s=Report$s, R0=Report$r0)
     
     
