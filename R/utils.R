@@ -99,7 +99,7 @@ gm <- function(x){
 #' @author Henning Winker and Laurence Kell 
 productivity <- function(object,s=0.7){ 
   spr0 = spr0y(object)
-  spr0_a = spr0y(object,byage=T)
+  spr0_a = spr0y(object,byage=T, simplify = FALSE)
   # Reproductive output Rs for bonyfish
   rs = 4*s/(spr0*(1-s))
   wm = stock.wt(object)*mat(object)
@@ -112,7 +112,7 @@ productivity <- function(object,s=0.7){
   
   # Make Leslie matrix 
   for(y in 1:dim(object)[2]){
-    if(is.na(spr0[,y])) next() 
+    if(is.na(an(spr0[,y]))) next() 
     L=mat.or.vec(nage,nage)
     L[1,] =   an(rs[,y])*wm[,y]
     #fill rest of Matrix with Survival
