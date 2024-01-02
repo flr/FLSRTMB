@@ -22,11 +22,14 @@
 #' @param s steepness parameter of SRR (fixed or prior mean)    
 #' @param spr0 unfished spawning biomass per recruit from FLCore::spr0(FLStock) 
 #' @param s.est option to estimate steepness
-#' @param s.logitsd prior sd for logit(s), default is 1.4 (flat) if s.est = TRUE
+#' @param s.logitsd prior sd for logit(s), default is 20 (flat) if s.est = TRUE
 #' @param r0.pr option to condition models on r0 priors (NULL = geomean)
 #' @param lplim lower bound of spawning ratio potential SRP, default 0.0001
 #' @param uplim upper bound of plausible spawning ratio potential SRP , default 0.3
 #' @param Blim fixing Blim, only works with segreg
+#' @param d.logitsd priod sd for logit(d) 
+#' @param ld lower bound of depensation parameter d
+#' @param ud upper bound of depensation parameter d
 #' @param plim depreciated plim = usrp
 #' @param pmax depreciated pmax = lsrp
 #' @param nyears yearMeans from the tail used to compute a,b from the reference spr0 (default all years)
@@ -68,7 +71,7 @@ setMethod("srrTMB", signature(object="FLSRs"),
 setMethod("srrTMB", signature(object="FLSR"),
   function(object, spr0="missing",
   s=NULL, s.est=TRUE, s.logitsd=20, r0.pr="missing",
-  lplim=0.001, uplim=0.3, Blim="missing", plim=lplim, pmax=uplim,
+  lplim=0.001, uplim=0.3, Blim="missing",d.logitsd=200,ld=0.5,ud=3,plim=lplim, pmax=uplim,
   nyears=NULL, report.sR0=FALSE, inits=NULL,
   lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE) {
   
@@ -146,7 +149,8 @@ setMethod("srrTMB", signature(object="FLSR"),
   # Fixed Blim
   if(!missing(Blim)){
     if(model!="segreg"){
-      stop(paste("The fixed Blim option requires model=segreg"))}
+      stop(paste("The fixed Blim option requires model=segreg"))
+      }
     
     object <- fmle(object, fixed=list(b=Blim),
                    method="Brent", lower=0.1, upper=max(rec(object)*1.5))
@@ -222,7 +226,7 @@ setMethod("srrTMB", signature(object="FLSR"),
     if(model=="bevholtDa") d.type = "A"
     
     if(is.null(inits)) inits <- c(log(r0init), log(0.3),to_logits(s,ll=ll,ul=ul))
-    
+    inits = c(inits,to_logitd(dmu,ld,ud)) # added d init
     if(missing(r0.pr)){
       prior_r0 = c(1,100,0)
     } else{
@@ -245,14 +249,24 @@ setMethod("srrTMB", signature(object="FLSR"),
      # SET TMB input
     inp <- list(
       # data
-      Data = list(ssb = ssb, rec = rec,prior_s = c(to_logits(s,ll,ul),s.logitsd), prior_r0 = prior_r0,
-                  spr0y = spr0.yr,spr0=spr0ref,plim=plim, nyears=length(ssb),slim=ll,smax=ul,
+      Data = list(ssb = ssb, rec = rec,
+                  prior_s = c(to_logits(s,ll,ul),s.logitsd), 
+                  prior_r0 = prior_r0,
+                  prior_d = c(to_logitd(dmu,ld,ud),d.logitsd),
+                  spr0y = spr0.yr,
+                  spr0=spr0ref,
+                  plim=plim, 
+                  nyears=length(ssb),
+                  smin=ll,smax=ul, # steepness
+                  dmin=ld-0.5,dmax=ud-0.5, # depensation
                   
                   # model
                   Rmodel = which(Rmod==c("bevholtSV","rickerSV","segreg"))-1,
                   depensationModel = which(d.type == c("None","A")) - 1),
+      
+      
       # inits
-      Params = list(log_r0 = inits[1], log_sigR = inits[2],logit_s=inits[3], log_d = 0),
+      Params = list(log_r0 = inits[1], log_sigR = inits[2],logit_s=inits[3], logit_d = inits[4]),
       # bounds
       lower=lower, upper=upper,
       #
@@ -262,7 +276,7 @@ setMethod("srrTMB", signature(object="FLSR"),
     # Compile TMB inputs 
       Map = list()
       if(d.type == "None")
-          Map$log_d = factor(NA)
+          Map$logit_d = factor(NA)
     # Turn off steepness estimation
     if(!s.est) Map[["logit_s"]] = factor( NA ) 
     

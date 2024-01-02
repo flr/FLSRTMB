@@ -183,13 +183,39 @@ plotsrs <- function(object,path=TRUE,b0=FALSE,rel=FALSE){
 sprior <- function(s=0.6,s.logitsd=20,ll=0.2,ul=1){
   d=0.00001
   x.logit = seq(-10,10,0.01)
-  mu.logit = to_logits(s,ll=0.2+d,ul=1-d)
+  mu.logit = to_logits(s,ll=ll+d,ul=ul-d)
   y = dnorm(x.logit,mu.logit,s.logitsd)
-  x= from_logits(x.logit)
+  x= from_logits(x.logit,ll=ll+d,ul=ul-d)
   df = data.frame(x=c(0.2,x,1),Density=c(0,y,0))
   ggplot(df, aes(x,Density))+theme_bw()+
     geom_area(aes(y=Density),fill="grey",alpha=1,col=1)+
     geom_vline(xintercept = s,size=0.5,col=2,linetype="dashed")+xlab("Steepness s")
+}
+
+#' dprior plot 
+
+#' Plots the logit prior distribution for depensation 
+#' @param d depensation, default 1 for a approx. uniform prior with s.logistsd = 20
+#' @param d.logitsd dependation sd, default 20 for a approx. uniform prior with s = 0.6
+#' @param ll lower bound of d = 0.25
+#' @param ul lower bound of d = 4
+#' @return ggplot
+#' @export
+#' @examples
+#' dprior() # approx. uniform with some curving on bounds
+#' dprior(d=1,s.logitsd=2) 
+dprior <- function(d=1,d.logitsd=200,ll=0.5,ul=3){
+  C=0.00001
+  x.logit = seq(-10,10,0.01)
+  mu.logit = to_logitd(d,ll=ll+C,ul=ul-C)
+  y = dnorm(x.logit,mu.logit,d.logitsd)
+  x= (from_logitd(x.logit,ll=ll+C,ul=ul-C))
+  df = data.frame(x=c(x),Density=c(y))
+  ggplot(df, aes(x,Density))+theme_bw()+
+    scale_x_continuous(limits = c(0, NA))+
+    geom_area(aes(y=Density),fill="grey",alpha=1,col=1)+
+    geom_vline(xintercept = d,size=0.5,col=2,linetype="dashed")+
+    xlab("Depensation d")
 }
 
 

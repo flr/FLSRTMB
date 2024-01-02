@@ -20,6 +20,9 @@ srrTMB(object, ...)
   lplim = 0.001,
   uplim = 0.3,
   Blim = "missing",
+  d.logitsd = 200,
+  ld = 0.5,
+  ud = 3,
   plim = lplim,
   pmax = uplim,
   nyears = NULL,
@@ -47,7 +50,7 @@ srrTMB(object, ...)
 
 \item{s.est}{option to estimate steepness}
 
-\item{s.logitsd}{prior sd for logit(s), default is 1.4 (flat) if s.est = TRUE}
+\item{s.logitsd}{prior sd for logit(s), default is 20 (flat) if s.est = TRUE}
 
 \item{r0.pr}{option to condition models on r0 priors (NULL = geomean)}
 
@@ -56,6 +59,12 @@ srrTMB(object, ...)
 \item{uplim}{upper bound of plausible spawning ratio potential SRP , default 0.3}
 
 \item{Blim}{fixing Blim, only works with segreg}
+
+\item{d.logitsd}{priod sd for logit(d)}
+
+\item{ld}{lower bound of depensation parameter d}
+
+\item{ud}{upper bound of depensation parameter d}
 
 \item{plim}{depreciated plim = usrp}
 

@@ -9,6 +9,20 @@
 from_logits <- function(logit_s,ll=0.2,ul=1){
   ll+0.001 + (ul-ll-0.0001) * 1/(1 + exp(-logit_s))}
 
+#' from_logitd()
+#'
+#' convert depensation d from logit
+#' @param logit_d logit(depensation)
+#' @param ll defines lower prior bound of d
+#' @param ul defines upper prior bound of d
+#' @return depensation d 
+#' @export
+from_logitd <- function(logit_d,ll=0.5,ul=3){
+  ll = ll-0.5
+  ul = ul-0.5
+  ll+0.001 + (ul-ll-0.0001) * 1/(1 + exp(-logit_d))+0.5
+  }
+
 
 #' to_logits()
 #'
@@ -20,6 +34,21 @@ from_logits <- function(logit_s,ll=0.2,ul=1){
 #' @export
 to_logits <- function(s,ll=0.2,ul=1){
   -log((ul-ll)/(s - ll+0.0001) - 1) 
+}
+
+#' to_logitd()
+#'
+#' convert steepness to logit
+#' @param d steepness s
+#' @param ll defines lower prior bound of s
+#' @param ul defines upper prior bound of s
+#' @return logit transformed steepness s 
+#' @export
+to_logitd <- function(d,ll=0.5,ul=3){
+  d = d-0.5
+  ll = ll-0.5
+  ul = ul-0.5
+  -log((ul-ll)/(d - ll+0.0001) - 1) 
 }
 
 #' spr0y()
