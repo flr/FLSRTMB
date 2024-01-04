@@ -20,6 +20,8 @@ srrTMB(object, ...)
   lplim = 0.001,
   uplim = 0.3,
   Blim = "missing",
+  d = 1,
+  d.est = TRUE,
   d.logitsd = 200,
   ld = 0.5,
   ud = 3,
@@ -48,7 +50,7 @@ srrTMB(object, ...)
 
 \item{s}{steepness parameter of SRR (fixed or prior mean)}
 
-\item{s.est}{option to estimate steepness}
+\item{s.est}{option to estimate depensation d}
 
 \item{s.logitsd}{prior sd for logit(s), default is 20 (flat) if s.est = TRUE}
 
@@ -59,6 +61,8 @@ srrTMB(object, ...)
 \item{uplim}{upper bound of plausible spawning ratio potential SRP , default 0.3}
 
 \item{Blim}{fixing Blim, only works with segreg}
+
+\item{d}{depensation parameter (default = 1)}
 
 \item{d.logitsd}{priod sd for logit(d)}
 
@@ -103,4 +107,15 @@ plotsrs(srs[2:4],b0=TRUE) # through to B0
 plotsrs(srs[2:4],b0=TRUE,rel=TRUE)  # relative
 gm@SV # estimates
 do.call(rbind,lapply(srs,AIC))
+# Depensation
+d.srs = FLSRs(
+uniform = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4)),
+larger1 = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4),ld=1),
+prior1 = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4),d=1.5,d.logitsd=1.5),
+prior1.5 = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4),d=1.5,d.logitsd=1.5),
+fixed1.5 = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4),d=1.5,d.est=FALSE),
+fixed2.5 = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4),d=2.5,d.est=FALSE)
+)
+plotsrs(d.srs) 
+
 }

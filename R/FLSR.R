@@ -27,6 +27,8 @@
 #' @param lplim lower bound of spawning ratio potential SRP, default 0.0001
 #' @param uplim upper bound of plausible spawning ratio potential SRP , default 0.3
 #' @param Blim fixing Blim, only works with segreg
+#' @param d depensation parameter (default = 1)   
+#' @param s.est option to estimate depensation d
 #' @param d.logitsd priod sd for logit(d) 
 #' @param ld lower bound of depensation parameter d
 #' @param ud upper bound of depensation parameter d
@@ -55,6 +57,17 @@
 #' plotsrs(srs[2:4],b0=TRUE,rel=TRUE)  # relative
 #' gm@SV # estimates
 #' do.call(rbind,lapply(srs,AIC))
+#' # Depensation
+#' d.srs = FLSRs(
+#' uniform = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4)),
+#' larger1 = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4),ld=1),
+#' prior1 = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4),d=1.5,d.logitsd=1.5),
+#' prior1.5 = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4),d=1.5,d.logitsd=1.5),
+#' fixed1.5 = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4),d=1.5,d.est=FALSE),
+#' fixed2.5 = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4),d=2.5,d.est=FALSE)
+#' )
+#' plotsrs(d.srs) 
+#' 
 
 setGeneric("srrTMB", function(object, ...) standardGeneric("srrTMB"))
 
@@ -71,7 +84,7 @@ setMethod("srrTMB", signature(object="FLSRs"),
 setMethod("srrTMB", signature(object="FLSR"),
   function(object, spr0="missing",
   s=NULL, s.est=TRUE, s.logitsd=20, r0.pr="missing",
-  lplim=0.001, uplim=0.3, Blim="missing",d.logitsd=200,ld=0.5,ud=3,plim=lplim, pmax=uplim,
+  lplim=0.001, uplim=0.3, Blim="missing",d=1,d.est=TRUE,d.logitsd=200,ld=0.5,ud=3,plim=lplim, pmax=uplim,
   nyears=NULL, report.sR0=FALSE, inits=NULL,
   lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE) {
   
@@ -80,7 +93,7 @@ setMethod("srrTMB", signature(object="FLSR"),
   silent = ifelse(verbose,1,0)
   
   s.inp = s
-
+  dmu = d
     
   if(is.null(nyears)) nyears = dim(ssb(object))[2]
   if(is.null(plim)){
@@ -275,7 +288,7 @@ setMethod("srrTMB", signature(object="FLSR"),
     
     # Compile TMB inputs 
       Map = list()
-      if(d.type == "None")
+      if(d.type == "None" | !d.est)
           Map$logit_d = factor(NA)
     # Turn off steepness estimation
     if(!s.est) Map[["logit_s"]] = factor( NA ) 
@@ -304,15 +317,16 @@ setMethod("srrTMB", signature(object="FLSR"),
     
     # DEBUG HACK
     model(object) <- switch(model, bevholtSV=bevholt, rickerSV=ricker,segreg=segreg,bevholtDa=bevholtDa)
-    
+   
     fitted(object) <- c(Report$rec_hat)
     residuals(object) <- log(rec(object)) - log(fitted(object))
     
-    params(object) <- FLPar(a=Report$a, b=Report$b,d=Report$d)
+    npars= length(params(object))
     
-    if(d.type=="none") params(object) = params(object)[1:2] 
+    params(object) <- FLPar(a=Report$a, b=Report$b,d=Report$d)[1:npars]
     
     if(report.sR0) params(object) <- FLPar(s=Report$s, R0=Report$r0)
+    
     
     
     # Add full loglik
