@@ -99,20 +99,22 @@ gm <- function(x){
 #' @author Henning Winker and Laurence Kell 
 productivity <- function(object,s=0.7){ 
   spr0 = spr0y(object)
-  spr0_a = spr0y(object,byage=T)
+  spr0_a = spr0y(object,byage=T, simplify = FALSE)
   # Reproductive output Rs for bonyfish
   rs = 4*s/(spr0*(1-s))
   wm = stock.wt(object)*mat(object)
   nage = dim(object)[1]
   nyr = dim(object)[2]
   age = dims(object)$min:dims(object)$max 
+  multage = spr0_a
+  multage[] = age # multiplier GT
   dn <- list(age='all', year=dims(object)$minyear:dims(object)$maxyear, unit='unique', season='all',area='unique')
   r = FLQuant(NA,dimnames=dn,units="1/year")  
   gt = FLQuant(NA,dimnames=dn,units="years") 
   
   # Make Leslie matrix 
   for(y in 1:dim(object)[2]){
-    if(is.na(spr0[,y])) next() 
+    if(is.na(an(spr0[,y]))) next() 
     L=mat.or.vec(nage,nage)
     L[1,] =   an(rs[,y])*wm[,y]
     #fill rest of Matrix with Survival
@@ -121,7 +123,7 @@ productivity <- function(object,s=0.7){
     L[nage,(i)] = exp(-m(object)[nage,y]) 
     # Net reproductive rate
     r[,y]=log(as.numeric(eigen(L)$values[1]))
-    gt[,y] = sum(age*spr0_a[,y])/spr0[,y]
+    gt[,y] = quantSums(multage[,y]*spr0_a[,y])/spr0[,y]
   }
   
   # return intrinsic rate of population increase r and generation GT
