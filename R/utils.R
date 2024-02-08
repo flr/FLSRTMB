@@ -135,6 +135,8 @@ productivity <- function(object,s=0.7){
   nage = dim(object)[1]
   nyr = dim(object)[2]
   age = dims(object)$min:dims(object)$max 
+  multage = spr0_a
+  multage[] = age # multiplier GT
   dn <- list(age='all', year=dims(object)$minyear:dims(object)$maxyear, unit='unique', season='all',area='unique')
   r = FLQuant(NA,dimnames=dn,units="1/year")  
   gt = FLQuant(NA,dimnames=dn,units="years") 
@@ -150,7 +152,7 @@ productivity <- function(object,s=0.7){
     L[nage,(i)] = exp(-m(object)[nage,y]) 
     # Net reproductive rate
     r[,y]=log(as.numeric(eigen(L)$values[1]))
-    gt[,y] = sum(age*spr0_a[,y])/spr0[,y]
+    gt[,y] = quantSums(multage[,y]*spr0_a[,y])/spr0[,y]
   }
   
   # return intrinsic rate of population increase r and generation GT
