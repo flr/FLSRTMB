@@ -21,6 +21,7 @@ Authors:
 Other contributors:
 \itemize{
   \item European Union [funder, copyright holder]
+  \item Christoffer Moesgaard Albertsen \email{cmoe@aqua.dtu.dk} (\href{https://orcid.org/0000-0003-0088-4363}{ORCID}) [contributor]
 }
 
 }
