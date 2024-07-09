@@ -28,7 +28,8 @@ srrTMB(object, ...)
   lower = NULL,
   upper = NULL,
   SDreport = TRUE,
-  verbose = FALSE
+  verbose = FALSE,
+  rm.yrs = "missing"
 )
 }
 \arguments{
@@ -74,6 +75,8 @@ srrTMB(object, ...)
 \item{SDreport}{option to converge hessian and get vcov}
 
 \item{verbose}{if TRUE, it shows tracing}
+
+\item{rm.yrs}{remove recruitment years from model fit}
 }
 \value{
 A list containing elements 'FLSR', of class \emph{FLSR}

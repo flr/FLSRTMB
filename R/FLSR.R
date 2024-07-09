@@ -36,6 +36,7 @@
 #' @param upper option to specify upper bounds of log(r0), log(SigR) and logit(s)
 #' @param upper option to specify upper bounds of log(r0), log(SigR) and logit(s)
 #' @param SDreport option to converge hessian and get vcov
+#' @param rm.yrs remove recruitment years from model fit
 #' @param verbose if TRUE, it shows tracing
 #' @return A list containing elements 'FLSR', of class *FLSR*
 #' @export
@@ -70,7 +71,7 @@ setMethod("srrTMB", signature(object="FLSR"),
   s=NULL, s.est=TRUE, s.logitsd=20, r0.pr="missing",
   lplim=0.001, uplim=0.3, Blim="missing", plim=lplim, pmax=uplim,
   nyears=NULL, report.sR0=FALSE, inits=NULL,
-  lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE) {
+  lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE,rm.yrs="missing") {
   
   d.type = c("None")
     
@@ -143,6 +144,14 @@ setMethod("srrTMB", signature(object="FLSR"),
   rec <- c(rec(object))
   ssb <- c(ssb(object))
   
+  yri = 1:length(dimnames(rec(object))$year)
+  
+  if(!missing(rm.yrs)){
+    yri = which(!dimnames(rec(object))$year%in%ac(rm.yrs))
+    rec = rec[yri]
+    ssb = ssb[yri]
+  }
+  
   # Fixed Blim
   if(!missing(Blim)){
     if(model!="segreg"){
@@ -203,7 +212,7 @@ setMethod("srrTMB", signature(object="FLSR"),
     
     # Set r0 init
     r0init= data.frame(rec=rec,ssb=ssb)       
-    r0init=median(r0init[quantile(r0init$ssb,0.6)>r0init$ssb,]$rec)
+    r0init=median(r0init[quantile(r0init$ssb,0.6,na.rm=T)>r0init$ssb,]$rec)
     
     
     # SET init and bounds
@@ -291,7 +300,9 @@ setMethod("srrTMB", signature(object="FLSR"),
     # DEBUG HACK
     model(object) <- switch(model, bevholtSV=bevholt, rickerSV=ricker,segreg=segreg,bevholtDa=bevholtDa)
     
-    fitted(object) <- c(Report$rec_hat)
+    
+    fitted(object)[,yri] <- c(Report$rec_hat)
+    
     residuals(object) <- log(rec(object)) - log(fitted(object))
     
     params(object) <- FLPar(a=Report$a, b=Report$b,d=Report$d)
@@ -306,8 +317,8 @@ setMethod("srrTMB", signature(object="FLSR"),
     N = length(residuals(object))
     sigma <- Report$sigR*sqrt((N-p)/N) # correct for p
     attr(object@logLik,"df") = p+1
-    attr(object@logLik,"nobs") = length(fitted(object)) 
-    object@logLik[] =  sum(dnorm(0, mean=residuals(object), sd=sigma, log=TRUE))
+    attr(object@logLik,"nobs") = length(fitted(object)[,yri]) 
+    object@logLik[] =  sum(dnorm(0, mean=residuals(object), sd=sigma, log=TRUE),na.rm = TRUE)
     
     # AR1 rho
     rho = stats::cor(residuals(object)[,-N],residuals(object)[,-1])
