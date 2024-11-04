@@ -33,6 +33,12 @@
 
 bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
   models=c("bevholt", "ricker", "segreg"), verbose=TRUE, ...) {
+  
+  # SET future.globals.maxSize if not set already
+  if(is.null(options('future.globals.maxSize')[[1]])) {
+    oldopt <- options(future.globals.maxSize=1500 * 1024 ^ 2)
+    on.exit(options(oldopt))
+  }
 
   # COMPUTE average of spr0 by year
   spr0x <- yearMeans(spr0y(x))
