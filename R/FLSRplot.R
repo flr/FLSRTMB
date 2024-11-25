@@ -234,4 +234,54 @@ blimprior <- function(lplim=0.05,uplim=0.2,s.logitsd=20,par="plim"){
   return(p)
 }
  
+#' blimprior1 plot 
 
+#' Plots the bounds of the hockey-stick break-point  
+#' @param lplim steepness, default 0.6 for a approx. uniform prior with s.logistsd = 20
+#' @param uplim s steepness, default 20 for a approx. uniform prior with s = 0.6
+#' @param s.sdlogit default 20
+#' @param par parameter on x-axis default "plim", else "sstar" 
+#' @return ggplot
+#' @export
+#' @examples
+#' blimprior1(lplim=0.001,uplim=0.2) # approx. uniform with some curving on bounds
+
+blimprior1 <- function(lplim=0.05,uplim=0.2,s.logitsd=20,par="plim"){
+  d=0.00001
+  ll = lplim/uplim 
+  ul = 1
+  mu = mean(c(lplim,uplim))
+  s = 1/(mu/lplim)
+  plim = lplim
+  pmax = seq(0.0001,0.9999,0.0001)
+  pmax = pmax[which((lplim/from_logits(-10, ll = plim/pmax, ul = 1)-uplim)^2==min((lplim/from_logits(-10, ll = plim/pmax, ul = 1)-uplim)^2))]
+  #s = an(quantile(c(ll,ul),0.75))
+  mu = mean(c(lplim,(uplim+pmax)/2)) #><> fix
+  mu1 = mean(c(lplim,uplim))
+  
+  ll =plim/pmax
+  ul = 1
+  #mu = mean(plim,pmax)
+  s = 1/(mu/lplim) #(mean(c(lplim,pmax))/lplim)
+  
+  1/s*lplim  
+  
+  lplim/s
+  x.logit = seq(-10,10,0.01)
+  mu.logit = to_logits(s,ll=ll+d,ul=1-d)
+  y = dnorm(x.logit,mu.logit,s.logitsd)
+  x= from_logits(x.logit,ll=ll,ul=1)
+  if(par=="plim"){
+    x=  lplim/x
+    df = data.frame(x=c(lplim,x,uplim),Density=c(0,y,0))
+    p <- ggplot(df, aes(x,Density))+theme_bw()+
+      geom_area(aes(y=Density),fill="grey",alpha=1,col=1)+
+      xlim(0,min(1.5*uplim,1))+xlab(expression("Bounds"~B[lim]/B[0]))
+  } else {
+    df = data.frame(x=c(ll,x,ul),Density=c(0,y,0))
+    p <- ggplot(df, aes(x,Density))+theme_bw()+
+      geom_area(aes(y=Density),fill="grey",alpha=1,col=1)+
+      xlim(0,1)+xlab(expression(s^"*"))
+  }
+  return(p)
+}
