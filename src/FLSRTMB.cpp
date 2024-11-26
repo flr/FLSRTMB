@@ -14,16 +14,19 @@ template<class Type>
 Type objective_function<Type>::operator() () {
   
   // Data
-  DATA_VECTOR( rec );
   DATA_VECTOR( ssb );
+  DATA_VECTOR( rec );
   DATA_VECTOR( prior_s ); // Prior vector for s, [logit(mean), stdev in logit, useflag]
   DATA_VECTOR( prior_r0 );
+  DATA_VECTOR( prior_d ); // Flat logistic prior for depensation
   DATA_VECTOR( spr0y );
   DATA_SCALAR( spr0 );
   DATA_SCALAR( plim ); // minimum bp of hockey-stick as fraction of Blim/B0
   DATA_INTEGER(nyears);
-  DATA_SCALAR( slim ); 
+  DATA_SCALAR( smin ); 
   DATA_SCALAR( smax ); 
+  DATA_SCALAR( dmin ); 
+  DATA_SCALAR( dmax ); 
   DATA_INTEGER(Rmodel); // Recruitment model
   DATA_INTEGER(depensationModel);
   
@@ -31,12 +34,14 @@ Type objective_function<Type>::operator() () {
   PARAMETER(log_r0);
   PARAMETER(log_sigR);
   PARAMETER(logit_s);
-  PARAMETER(log_d);
+  PARAMETER(logit_d);
   // Derived quantities
   Type r0 = exp(log_r0);
   Type sigR = exp(log_sigR);
-  Type sinit = slim+0.001 + (smax-slim-0.001)*1/(1+exp(-logit_s));
-  Type d = exp(log_d);
+  Type sinit = smin+0.001 + (smax-smin-0.001)*1/(1+exp(-logit_s));
+  Type dinit = dmin+0.001 + (dmax-dmin-0.001)*1/(1+exp(-logit_d))+0.5;
+  
+  //Type d = exp(log_d);
   
   vector<Type> log_rec_hat( nyears );
   vector<Type> vy = spr0y * r0;
@@ -44,6 +49,7 @@ Type objective_function<Type>::operator() () {
   Type a = 0.001;
   Type b = 0.001;
   Type s = 0.5;
+  Type d = 1.0;
   
   // Objective function
   Type ans=0;
@@ -58,7 +64,8 @@ Type objective_function<Type>::operator() () {
       Type s50x = vy(t) * (1 - s) / (5.0 * s - 1.0);
       Type ssbx = ssb(t) / s50x;
       if(depensationModel == 1){
-	ssbx = pow(ssbx, d);
+        d = dinit;
+        ssbx = pow(ssbx, d);
       }
       log_rec_hat(t) = log(rmaxx / (1.0 + 1.0 / ssbx));
     }
@@ -74,7 +81,7 @@ Type objective_function<Type>::operator() () {
       // Rescale SSB by point of maximum recruitment (1/b);
       Type ssbx = ssb(t) * b;
       if(depensationModel == 1){
-	ssbx = pow(ssbx, d);
+        ssbx = pow(ssbx, d);
       }
       log_rec_hat(t) = log(a / b * ssbx * exp(-ssbx));
     }
@@ -88,10 +95,10 @@ Type objective_function<Type>::operator() () {
       // Re-parameterize to have breakpoint at 1 by scaling with breakpoint
       Type ssbx = ssb(t) / (plim*vy(t)/s);
       if(depensationModel == 1){ // Type A: R(S^d)
-	ssbx = pow(ssbx, d);
+        ssbx = pow(ssbx, d);
       }
       log_rec_hat(t) = log(r0) + log(0.5 * (ssbx + 1.0 - pow(pow(ssbx - 1.0, 2.0), 0.5)));
-
+      
     }
   }
   
@@ -107,9 +114,13 @@ Type objective_function<Type>::operator() () {
   
   //r0 prior
   if(prior_r0(2)==1){
-  ans -= dnorm(log_r0, prior_r0(0), prior_r0(1), 1);
+    ans -= dnorm(log_r0, prior_r0(0), prior_r0(1), 1);
   }
   
+  //prior soft d
+  if(depensationModel == 1){
+    ans -= dnorm(logit_d, prior_d(0), prior_d(1), 1); // Prior for logn
+  }  
   
   if(Rmodel==0){
     a = Type(4)*v*s/(spr0*(Type(5)*s-Type(1)));
@@ -125,8 +136,8 @@ Type objective_function<Type>::operator() () {
     b = plim*v/s;
     a = r0/b;
   }
-
- 
+  
+  
   
   // Reporting
   REPORT( rec_hat );

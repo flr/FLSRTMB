@@ -5,7 +5,13 @@
 \title{blimprior plot
 Plots the bounds of the hockey-stick break-point}
 \usage{
-blimprior(lplim = 0.05, uplim = 0.2, s.logitsd = 20, par = "plim")
+blimprior(
+  lplim = 0.01,
+  uplim = 0.3,
+  s.logitsd = 50,
+  par = "plim",
+  bias.correct = TRUE
+)
 }
 \arguments{
 \item{lplim}{steepness, default 0.6 for a approx. uniform prior with s.logistsd = 20}
@@ -24,6 +30,8 @@ blimprior plot
 Plots the bounds of the hockey-stick break-point
 }
 \examples{
-sprior() # approx. uniform with some curving on bounds
-sprior(s=0.8,s.logitsd=0.5) 
+blimprior() # approx. uniform with some curving on bounds
+blimprior(lplim=0.001,uplim=0.3,s.logitsd=20) 
+# Non-bias corrected
+blimprior(lplim=0.001,uplim=0.3,s.logitsd=20,bias.correct=FALSE)
 }

@@ -27,6 +27,11 @@
 #' @param lplim lower bound of spawning ratio potential SRP, default 0.0001
 #' @param uplim upper bound of plausible spawning ratio potential SRP , default 0.3
 #' @param Blim fixing Blim, only works with segreg
+#' @param d depensation parameter (default = 1)   
+#' @param d.est option to estimate depensation d
+#' @param d.logitsd priod sd for logit(d) 
+#' @param ld lower bound of depensation parameter d
+#' @param ud upper bound of depensation parameter d
 #' @param plim depreciated plim = usrp
 #' @param pmax depreciated pmax = lsrp
 #' @param nyears yearMeans from the tail used to compute a,b from the reference spr0 (default all years)
@@ -36,6 +41,7 @@
 #' @param upper option to specify upper bounds of log(r0), log(SigR) and logit(s)
 #' @param upper option to specify upper bounds of log(r0), log(SigR) and logit(s)
 #' @param SDreport option to converge hessian and get vcov
+#' @param bias.correct if TRUE, bias correction of the uniform logistic hockey-stick prior for Blim/B0 (recommended) 
 #' @param rm.yrs remove recruitment years from model fit
 #' @param verbose if TRUE, it shows tracing
 #' @return A list containing elements 'FLSR', of class *FLSR*
@@ -53,7 +59,23 @@
 #' plotsrs(srs[2:4],b0=TRUE,rel=TRUE)  # relative
 #' gm@SV # estimates
 #' do.call(rbind,lapply(srs,AIC))
-
+#' # Bias-correction test for Hockey-Stick
+#'srs=FLSRs(
+#'  correct = srrTMB(as.FLSR(ple4,model=segreg),spr0=mean(spr0y(ple4)),lplim=0.001,uplim=0.08),
+#'  bias =srrTMB(as.FLSR(ple4,model=segreg),spr0=mean(spr0y(ple4)),lplim=0.001,uplim=0.08,bias.correct=F,s.logitsd=20))
+#' plotsrs(srs,rel=T)
+#' # Depensation
+#' d.srs = FLSRs(
+#' uniform = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4)),
+#' larger1 = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4),ld=1),
+#' prior1 = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4),d=1.5,d.logitsd=1.5),
+#' prior1.5 = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4),d=1.5,d.logitsd=1.5),
+#' fixed1.5 = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4),d=1.5,d.est=FALSE),
+#' fixed2.5 = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4),d=2.5,d.est=FALSE)
+#' )
+#' plotsrs(d.srs) 
+#' 
+ 
 setGeneric("srrTMB", function(object, ...) standardGeneric("srrTMB"))
 
 #' @rdname srrTMB
@@ -68,17 +90,17 @@ setMethod("srrTMB", signature(object="FLSRs"),
 
 setMethod("srrTMB", signature(object="FLSR"),
   function(object, spr0="missing",
-  s=NULL, s.est=TRUE, s.logitsd=20, r0.pr="missing",
-  lplim=0.001, uplim=0.3, Blim="missing", plim=lplim, pmax=uplim,
+  s=NULL, s.est=TRUE, s.logitsd=50, r0.pr="missing",
+  lplim=0.01, uplim=0.3, Blim="missing",d=1,d.est=TRUE,d.logitsd=100,ld=0.5,ud=3, plim=lplim, pmax=uplim,
   nyears=NULL, report.sR0=FALSE, inits=NULL,
-  lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE,rm.yrs="missing") {
+  lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE,rm.yrs="missing",bias.correct=TRUE) {
   
   d.type = c("None")
     
   silent = ifelse(verbose,1,0)
   
   s.inp = s
-
+  dmu = d #><> mean depensation 
     
   if(is.null(nyears)) nyears = dim(ssb(object))[2]
   if(is.null(plim)){
@@ -125,6 +147,18 @@ setMethod("srrTMB", signature(object="FLSR"),
     #s = an(quantile(c(ll,ul),0.75))
     mu = mean(c(plim,pmax))
     s = 1/(mu/plim)
+    # Bias correction
+    if(bias.correct){
+      plim = lplim
+      pmax = seq(0.0001,0.9999,0.0001)
+      # optimize
+      pmax = pmax[which((lplim/from_logits(-20, ll = plim/pmax, ul = 1)-uplim)^2==min((lplim/from_logits(-20, ll = plim/pmax, ul = 1)-uplim)^2))]
+      ll =plim/pmax
+      ul = 1
+      mu = mean(c(lplim,(uplim+pmax)/2)) #><> fix
+      s = 1/(mu/lplim) 
+    }
+    
   }
   if(model=="rickerSV"){
     ll = 0.2
@@ -232,6 +266,8 @@ setMethod("srrTMB", signature(object="FLSR"),
     
     if(is.null(inits)) inits <- c(log(r0init), log(0.3),to_logits(s,ll=ll,ul=ul))
     
+    inits = c(inits,to_logitd(dmu,ld,ud)) #><> new added d init
+    
     if(missing(r0.pr)){
       prior_r0 = c(1,100,0)
     } else{
@@ -249,19 +285,21 @@ setMethod("srrTMB", signature(object="FLSR"),
       lower <- c(min(log(rec)), log(0.05),-100,-10)
     if(is.null(upper))
       upper <- c(max(log(rec * 20)), log(1.5),100,10)
+    
     # preliminary HACK for depensation model  
      Rmod = ifelse(model=="bevholtDa","bevholtSV",model)
      # SET TMB input
     inp <- list(
       # data
-      Data = list(ssb = ssb, rec = rec,prior_s = c(to_logits(s,ll,ul),s.logitsd), prior_r0 = prior_r0,
-                  spr0y = spr0.yr,spr0=spr0ref,plim=plim, nyears=length(ssb),slim=ll,smax=ul,
-                  
+      Data = list(rec = rec, ssb = ssb,prior_s = c(to_logits(s,ll,ul),s.logitsd), prior_r0 = prior_r0,
+                  prior_d = c(to_logitd(dmu,ld,ud),d.logitsd),
+                  spr0y = spr0.yr,spr0=spr0ref,plim=plim, nyears=length(ssb),smin=ll,smax=ul,
+                  dmin=ld-0.5,dmax=ud-0.5, # depensation
                   # model
                   Rmodel = which(Rmod==c("bevholtSV","rickerSV","segreg"))-1,
                   depensationModel = which(d.type == c("None","A")) - 1),
       # inits
-      Params = list(log_r0 = inits[1], log_sigR = inits[2],logit_s=inits[3], log_d = 0),
+      Params = list(log_r0 = inits[1], log_sigR = inits[2],logit_s=inits[3], logit_d = inits[4]),
       # bounds
       lower=lower, upper=upper,
       #
@@ -270,8 +308,8 @@ setMethod("srrTMB", signature(object="FLSR"),
     
     # Compile TMB inputs 
       Map = list()
-      if(d.type == "None")
-          Map$log_d = factor(NA)
+      if(d.type == "None"| !d.est)
+          Map$logit_d = factor(NA)
     # Turn off steepness estimation
     if(!s.est) Map[["logit_s"]] = factor( NA ) 
     
