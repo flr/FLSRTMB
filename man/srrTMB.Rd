@@ -119,7 +119,7 @@ do.call(rbind,lapply(srs,AIC))
 srs=FLSRs(
  correct = srrTMB(as.FLSR(ple4,model=segreg),spr0=mean(spr0y(ple4)),lplim=0.001,uplim=0.08),
  bias =srrTMB(as.FLSR(ple4,model=segreg),spr0=mean(spr0y(ple4)),lplim=0.001,uplim=0.08,bias.correct=F,s.logitsd=20))
-plotsrs(srs,rel=T)
+plotsrs(srs,rel=TRUE)
 # Depensation
 d.srs = FLSRs(
 uniform = srrTMB(as.FLSR(ple4,model=bevholtDa),spr0=spr0y(ple4)),
