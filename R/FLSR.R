@@ -301,13 +301,14 @@ setMethod("srrTMB", signature(object="FLSR"),
       #
       ReportSD = SDreport
     )
-    
+browser()    
     # Compile TMB inputs 
       Map = list()
       if(d.type == "None"| !d.est)
           Map$logit_d = factor(NA)
     # Turn off steepness estimation
-    if(!s.est) Map[["logit_s"]] = factor( NA ) 
+    if(!s.est)
+      Map[["logit_s"]] = factor( NA ) 
     
     # CREATE TMB object
     Obj <- TMB::MakeADFun(data = inp$Data, parameters = inp$Params,map=Map,

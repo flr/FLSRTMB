@@ -81,6 +81,7 @@ Type objective_function<Type>::operator() () {
       // Rescale SSB by point of maximum recruitment (1/b);
       Type ssbx = ssb(t) * b;
       if(depensationModel == 1){
+        d = dinit;
         ssbx = pow(ssbx, d);
       }
       log_rec_hat(t) = log(a / b * ssbx * exp(-ssbx));
@@ -95,6 +96,7 @@ Type objective_function<Type>::operator() () {
       // Re-parameterize to have breakpoint at 1 by scaling with breakpoint
       Type ssbx = ssb(t) / (plim*vy(t)/s);
       if(depensationModel == 1){ // Type A: R(S^d)
+        d = dinit;
         ssbx = pow(ssbx, d);
       }
       log_rec_hat(t) = log(r0) + log(0.5 * (ssbx + 1.0 - pow(pow(ssbx - 1.0, 2.0), 0.5)));
