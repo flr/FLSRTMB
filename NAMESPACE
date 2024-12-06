@@ -3,12 +3,17 @@ useDynLib(FLSRTMB)
 
 import("TMB")
 import("FLCore")
+import("ggplot2")
+import("ggplotFL")
 import("doFuture")
 importFrom("progressr",
   "progressor")
 importFrom("scales",
   "comma",
   "scientific")
+importFrom("methods", "as")
+importFrom("stats", "aggregate", "dnorm", "lm", "na.omit", "runif")
+importFrom("utils", "data")
 
 exportPattern("^[[:alpha:]]+")
 

@@ -94,7 +94,7 @@ setMethod("srrTMB", signature(object="FLSR"),
   lplim=0.01, uplim=0.3, Blim="missing",d=1,d.est=TRUE,d.logitsd=100,ld=0.5,ud=3, plim=lplim, pmax=uplim,
   nyears=NULL, report.sR0=FALSE, inits=NULL,
   lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE,rm.yrs="missing",bias.correct=TRUE) {
-  
+
   d.type = c("None")
     
   silent = ifelse(verbose,1,0)
@@ -109,8 +109,6 @@ setMethod("srrTMB", signature(object="FLSR"),
   
   # IDENTIFY model
   model <- SRModelName(model(object))
-  
-
   
   if(model=="mean"){
     gmB0 = TRUE
@@ -127,7 +125,7 @@ setMethod("srrTMB", signature(object="FLSR"),
   if(model%in%c("bevholt","ricker"))
     model <- paste0(model, "SV")
  
-  if(!model%in%c("mean","segreg","bevholtSV","rickerSV","bevholtDa"))
+  if(!model%in%c("mean","segreg","segregDa","bevholtSV","rickerSV","bevholtDa"))
     stop(paste("S-R model:",model,"is not (yet) defined in FLSRTMB"))
   
   if(length(spr0)>1){
@@ -141,7 +139,7 @@ setMethod("srrTMB", signature(object="FLSR"),
   spr0.yr = c(spr0.yr)
   spr0ref = mean(spr0.yr[(length(spr0.yr)-nyears+1):(length(spr0.yr))])
   
-  if(model=="segreg"){ # Adjust dynamically
+  if(model %in% c("segreg", "segregDa")){ # Adjust dynamically
     ll =plim/pmax
     ul = 1
     #s = an(quantile(c(ll,ul),0.75))
@@ -171,8 +169,6 @@ setMethod("srrTMB", signature(object="FLSR"),
     if(is.null(s)& s.est){s=mean(c(ll,ul))} # central value for s = 0.2-1.0
     if(is.null(s)& !s.est){s=0.7}
   }
-  
-  
   
   # GET rec, ssb
   rec <- c(rec(object))
@@ -250,7 +246,7 @@ setMethod("srrTMB", signature(object="FLSR"),
     
     
     # SET init and bounds
-    if(model=="segreg"){
+    if(model %in% c("segreg", "segregDa")){
       srp = an(quantile(an((object@ssb/object@rec)/spr0ref),c(0.6)))
       srp = max(min(srp,0.9*pmax,srp),plim*1.1)
       if(is.null(s.inp)){
@@ -262,7 +258,7 @@ setMethod("srrTMB", signature(object="FLSR"),
       #if(is.null(inits)) inits <- c(log(r0init), log(0.4),to_logits(s,lim=lim))
     } 
     # ><> depensation
-    if(model=="bevholtDa") d.type = "A"
+    if(model %in% c("bevholtDa", "segregDa")) d.type = "A"
     
     if(is.null(inits)) inits <- c(log(r0init), log(0.3),to_logits(s,ll=ll,ul=ul))
     
@@ -287,7 +283,7 @@ setMethod("srrTMB", signature(object="FLSR"),
       upper <- c(max(log(rec * 20)), log(1.5),100,10)
     
     # preliminary HACK for depensation model  
-     Rmod = ifelse(model=="bevholtDa","bevholtSV",model)
+    Rmod <- switch(model, 'bevholtDa'='bevholtSV', 'segregDa'='segreg', model)
      # SET TMB input
     inp <- list(
       # data
@@ -336,7 +332,7 @@ setMethod("srrTMB", signature(object="FLSR"),
     # LOAD output in FLSR
     
     # DEBUG HACK
-    model(object) <- switch(model, bevholtSV=bevholt, rickerSV=ricker,segreg=segreg,bevholtDa=bevholtDa)
+    model(object) <- switch(model, bevholtSV=bevholt, rickerSV=ricker,segreg=segreg,bevholtDa=bevholtDa,segregDa=segregDa)
     
     
     fitted(object)[,yri] <- c(Report$rec_hat)
