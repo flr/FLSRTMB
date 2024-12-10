@@ -301,7 +301,6 @@ setMethod("srrTMB", signature(object="FLSR"),
       #
       ReportSD = SDreport
     )
-browser()    
     # Compile TMB inputs 
       Map = list()
       if(d.type == "None"| !d.est)
