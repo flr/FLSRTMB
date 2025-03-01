@@ -183,9 +183,7 @@ setMethod("srrTMB", signature(object="FLSR"),
   }
   
   # Fixed Blim
-  if(!missing(Blim)){
-    if(model!="segreg"){
-      stop(paste("The fixed Blim option requires model=segreg"))}
+  if(!missing(Blim) & model=="segreg"){
     
     object <- fmle(object, fixed=list(b=Blim),
                    method="Brent", lower=0.1, upper=max(rec(object)*1.5))
