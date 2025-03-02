@@ -184,9 +184,8 @@ setMethod("srrTMB", signature(object="FLSR"),
   
   # Fixed Blim
   if(!missing(Blim) & model=="segreg"){
-    
     object <- fmle(object, fixed=list(b=Blim),
-                   method="Brent", lower=0.1, upper=max(rec(object)*1.5))
+      method="Brent", lower=0.1, upper=max(rec(object)*1.5))
     
     # Add loglik manually (to learn)
     p = 1
@@ -197,6 +196,9 @@ setMethod("srrTMB", signature(object="FLSR"),
     object@logLik[] =  sum(dnorm(0, mean=residuals(object), sd=sigma, log=TRUE))
     #check logLik(gmfit)
     object@vcov = matrix(0,nrow=1,dimnames = list(c("a"),c("a")))
+
+    # ADD d
+    params(object)$d <- 1
     
     # AR1 rho
     rho = stats::cor(residuals(object)[,-N],residuals(object)[,-1])
@@ -273,8 +275,6 @@ setMethod("srrTMB", signature(object="FLSR"),
     prior_r0[3] = 1  
     }
     
-  
-    
     if(is.null(lower))
       lower <- c(min(log(rec)), log(0.05),-100,-10)
     if(is.null(upper))
@@ -310,8 +310,6 @@ setMethod("srrTMB", signature(object="FLSR"),
     # CREATE TMB object
     Obj <- TMB::MakeADFun(data = inp$Data, parameters = inp$Params,map=Map,
                           DLL = "FLSRTMB", silent = TRUE)
-    
-    
     
     Opt <- stats::nlminb(start=Obj$par, objective=Obj$fn, gradient=Obj$gr,
                          control=list("trace"=silent, "eval.max"=1e4, "iter.max"=1e4),
@@ -355,14 +353,12 @@ setMethod("srrTMB", signature(object="FLSR"),
     # AR1 rho
     rho = stats::cor(residuals(object)[,-N],residuals(object)[,-1])
     
-    
     if(model!="segreg"){
-      attr(object,"SV") = data.frame(s=Report$s,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref, d = ifelse(d.type=="None",NA,Report$d))
+      attr(object,"SV") = data.frame(s=Report$s,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref)
     } else{
-      attr(object,"SV") = data.frame(s=NA,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref, d = ifelse(d.type=="None",NA,Report$d))
+      attr(object,"SV") = data.frame(s=NA,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref)
       
     }
-    
     
     if(SDreport & report.sR0==FALSE){
       object@vcov = matrix(SD$cov,nrow=2,dimnames = list(c("a","b"),c("a","b")))

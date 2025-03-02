@@ -68,13 +68,16 @@ bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
   res <- foreach(i=seq(iters),
     .options.future=list(globals=structure(TRUE, add=c("x", "id", "mod",
     "spr0x", "method", "models", "logLik"), packages=c("FLCore"),
-    seed=TRUE))) %dofuture% {
+    seed=TRUE))) %do% {
 
     y <- x
 
     rec(y) <- rec(y)[, id[, i]]
     ssb(y) <- ssb(y)[, id[, i]]
-  
+
+    # SET dimnames$year to avoid repeats, freaks FLQuant()
+    dimnames(y)$year <- seq(dim(y)[2])
+
     fits <- lapply(mod, function(m) {
       model(y) <- m
       srrTMB(y, spr0=spr0x, verbose=FALSE, ...)
@@ -109,7 +112,6 @@ bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
     
     # MATCH models: bevholt=1, ricker=2, segreg=3
     m <- match(models[best], c("bevholt", "ricker", "segreg"))
-
     fit <- fits[[best]]
 
     # RETURN: params, model, spr0, logLik, SR fit params
