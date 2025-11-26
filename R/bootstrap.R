@@ -32,16 +32,14 @@
 #' mods <- bootstrapSR(ple4, iter=50, model=c("bevholt", "segreg"))
 
 bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
-  models=c("bevholt", "ricker", "segreg"), verbose=TRUE, ...) {
+  models=c("bevholt", "ricker", "segreg"), verbose=TRUE,
+  spr0=yearMeans(spr0y(x)), ...) {
   
   # SET future.globals.maxSize if not set already
   if(is.null(options('future.globals.maxSize')[[1]])) {
     oldopt <- options(future.globals.maxSize=1500 * 1024 ^ 2)
     on.exit(options(oldopt))
   }
-
-  # COMPUTE average of spr0 by year
-  spr0x <- yearMeans(spr0y(x))
 
   # BUILD FLSR
   x <- as.FLSR(x)
@@ -67,7 +65,7 @@ bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
 
   res <- foreach(i=seq(iters),
     .options.future=list(globals=structure(TRUE, add=c("x", "id", "mod",
-    "spr0x", "method", "models", "logLik"), packages=c("FLCore"),
+    "spr0", "method", "models", "logLik"), packages=c("FLCore"),
     seed=TRUE))) %do% {
 
     y <- x
@@ -80,7 +78,7 @@ bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
 
     fits <- lapply(mod, function(m) {
       model(y) <- m
-      srrTMB(y, spr0=spr0x, verbose=FALSE, ...)
+      srrTMB(y, spr0=spr0, verbose=FALSE, ...)
     })
 
     if(verbose)
@@ -115,7 +113,7 @@ bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
     fit <- fits[[best]]
 
     # RETURN: params, model, spr0, logLik, SR fit params
-    rbind(params(fit), FLPar(m=m, spr0=spr0x, logLik=llkhds[best]),
+    rbind(params(fit), FLPar(m=m, spr0=spr0, logLik=llkhds[best]),
       FLPar(attr(fit, 'SV')))
   }
 
