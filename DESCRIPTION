@@ -1,6 +1,6 @@
 Package: FLSRTMB
 Title: FLSR in TMB
-Version: 1.1.4.9019
+Version: 1.1.4.9020
 Authors@R: 
  c(
    person("Henning", "Winker", email = "henning.winker@ec.europa.eu",

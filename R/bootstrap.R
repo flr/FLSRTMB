@@ -42,7 +42,7 @@ bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
   }
 
   # BUILD FLSR
-  x <- as.FLSR(x)
+  x <- as.FLSR(nounit(x))
   
   # SAMPLES, year * iters
   id <- matrix(sample(seq(dim(x)[2]), dim(x)[2] * iters, replace=TRUE),
