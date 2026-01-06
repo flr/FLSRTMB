@@ -82,9 +82,11 @@ hs = srrTMB(as.FLSR(ple4,model=segreg),s.est=T, spr0=spr0y(ple4))
 
 hs.b01 = srrTMB(as.FLSR(ple4,model=segreg),s.est=T, spr0=spr0y(ple4),plim=0.1)
 
+hs.b02 = srrTMB(as.FLSR(ple4,model=segreg),s.est=T, spr0=spr0y(ple4),Blim=400000)
+
 # Compare
 
-plot(FLSRs(hs=hs,hs.b01=hs.b01))+theme(legend.position="right")
+plot(FLSRs(hs=hs,hs.b01=hs.b01,hs.b02=hs.b02))+theme(legend.position="right")
 
 # Compute Blim/B0 
 ab = (params(hs.b01))

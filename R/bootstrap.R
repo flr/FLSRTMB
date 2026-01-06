@@ -41,6 +41,9 @@ bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
     on.exit(options(oldopt))
   }
 
+  # COMPUTE spr0
+  spr0 <- spr0
+
   # BUILD FLSR
   x <- as.FLSR(nounit(x))
   
@@ -70,11 +73,9 @@ bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
 
     y <- x
 
-    rec(y) <- rec(y)[, id[, i]]
-    ssb(y) <- ssb(y)[, id[, i]]
-
-    # SET dimnames$year to avoid repeats, freaks FLQuant()
-    dimnames(y)$year <- seq(dim(y)[2])
+    # ASSIGN values only to keep dimnames
+    rec(y)[] <- rec(y)[, id[, i]]
+    ssb(y)[] <- ssb(y)[, id[, i]]
 
     fits <- lapply(mod, function(m) {
       model(y) <- m
