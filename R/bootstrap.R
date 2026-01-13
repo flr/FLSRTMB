@@ -113,9 +113,17 @@ bootstrapSR <- function(x, iters=100, method=c("best", "logLik", "relative"),
     m <- match(models[best], c("bevholt", "ricker", "segreg"))
     fit <- fits[[best]]
 
+    # COMPUTE rho from residuals(fit, input)
+    rho <- rho(residuals(fitted(fit), rec(x)))
+
+    # COMPUTE sigmaR from residuals(fit, y)
+    N <- length(fitted(fit))
+    sigmaR <- sqrt(sum(residuals(fitted(fit), rec(y)) ^ 2) / (N - 1)) *
+        sqrt((N - 1) / N)
+  
     # RETURN: params, model, spr0, logLik, SR fit params
-    rbind(params(fit), FLPar(m=m, spr0=spr0, logLik=llkhds[best]),
-      FLPar(attr(fit, 'SV')))
+    rbind(params(fit),  FLPar(m=m, spr0=spr0, logLik=llkhds[best],
+      rho=c(rho), sigmaR=c(sigmaR)), FLPar(attr(fit, 'SV'))[c("R0", "B0")])
   }
 
   # COMBINE along iters
