@@ -30,7 +30,7 @@ df = data.frame(as.data.frame(rec(object)),ssb=as.data.frame(ssb(object))$data)
 df2 = data.frame(as.data.frame(fitted(object)),name=object@name)  
 
 p = ggplot(df,aes(year,data))+theme_bw()+geom_point(pch=21,color=1,fill="white")+
-  geom_line(data=df2,aes(year,data),size=0.8)+theme(legend.title = element_blank())+
+  geom_line(data=df2,aes(year,data),linewidth=0.8)+theme(legend.title = element_blank())+
   ylab("Recruitment")+xlab("Year")+theme(legend.position = "none") 
 }
   
@@ -43,7 +43,7 @@ if(class(object)=="FLSRs"){
   df2$name = factor(df2$name,levels=unique(df2$name))
   
   p = ggplot(df2,aes(year,data,color=name))+theme_bw()+
-    geom_line(size=0.8)+theme(legend.title = element_blank())+
+    geom_line(linewidth=0.8)+theme(legend.title = element_blank())+
     ylab("Recruitment")+xlab("Year")+geom_point(data=df,aes(year,data) ,pch=21,color=1,fill="white")
 
   if(length(object)==1) p= p+theme(legend.position = "none")  
@@ -120,7 +120,7 @@ plotsrs <- function(object,path=TRUE,b0=FALSE,rel=FALSE){
             res$sr = factor(res$sr,levels=object@names)
             # GET plot
             p <- ggplot(na.omit(res), aes(x=ssb, y=rec, colour=sr,fill=sr)) +
-              geom_line(size=0.8) + theme_bw()
+              geom_line(linewidth=0.8) + theme_bw()
              
               if(length(object)==1){
               p <- p+theme(legend.position="none",legend.title = element_blank()) 
@@ -161,7 +161,7 @@ plotsrs <- function(object,path=TRUE,b0=FALSE,rel=FALSE){
                 geom_point(data=dat,aes(fill=sr),color=1,cex=cexs,pch=pchs,alpha=0.5)
               
               }
-              p <- p+geom_line(data=na.omit(res),size=0.8) 
+              p <- p+geom_line(data=na.omit(res),linewidth=0.8) 
             } # path
             
     return(p)
@@ -189,7 +189,7 @@ sprior <- function(s=0.6,s.logitsd=20,ll=0.2,ul=1){
   df = data.frame(x=c(0.2,x,1),Density=c(0,y,0))
   ggplot(df, aes(x,Density))+theme_bw()+
     geom_area(aes(y=Density),fill="grey",alpha=1,col=1)+
-    geom_vline(xintercept = s,size=0.5,col=2,linetype="dashed")+xlab("Steepness s")
+    geom_vline(xintercept = s,linewidth=0.5,col=2,linetype="dashed")+xlab("Steepness s")
 }
 
 
@@ -270,7 +270,7 @@ dprior <- function(d=1,d.logitsd=100,ll=0.5,ul=3){
   ggplot(df, aes(x,Density))+theme_bw()+
     scale_x_continuous(limits = c(0, NA))+
     geom_area(aes(y=Density),fill="grey",alpha=1,col=1)+
-    geom_vline(xintercept = d,size=0.5,col=2,linetype="dashed")+
+    geom_vline(xintercept = d,linewidth=0.5,col=2,linetype="dashed")+
     xlab("Depensation d")
 }
 
