@@ -94,14 +94,14 @@ setMethod("srrTMB", signature(object="FLSR"),
   lplim=0.01, uplim=0.3, Blim="missing",d=1,d.est=TRUE,d.logitsd=100,ld=0.5,ud=3, plim=lplim, pmax=uplim,
   nyears=NULL, report.sR0=FALSE, inits=NULL,
   lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE,rm.yrs="missing",bias.correct=TRUE) {
-
+browser()
   d.type = c("None")
-    
+
   silent = ifelse(verbose,1,0)
   
   s.inp = s
   dmu = d #><> mean depensation 
-    
+
   if(is.null(nyears)) nyears = dim(ssb(object))[2]
   if(is.null(plim)){
     if(is.null(s)& s.est){ plim=0.01} else {plim=0.1}
@@ -128,18 +128,21 @@ setMethod("srrTMB", signature(object="FLSR"),
   if(!model%in%c("mean","segreg","segregDa","bevholtSV","rickerSV","bevholtDa"))
     stop(paste("S-R model:",model,"is not (yet) defined in FLSRTMB"))
   
-  if(length(spr0)>1){
-    #if(length(ssb(object))+1!=length(spr0)) stop("The spr0 vector must correct to non NA values of ssb(stock)")
-    spr0.yr =  trim(spr0,year=dims(ssb(object))[["minyear"]]:dims(ssb(object))[["maxyear"]])
-  } else {
-    spr0.yr= ssb(object)
-    spr0.yr[] = spr0  
+  # DOING
+  if(is(spr0, 'FLQuant')) {
+    if(dim(spr0)[2] > 1) {
+      spr0.yr <- spr0
+      spr0ref <- yearMeans(spr0)
+      } else {
+        spr0.yr <- expand(spr0, year=dimnames(object)$year)
+        spr0ref <- spr0
+      }
+    } else if (is(spr0, 'numeric')) {
+      spr0.yr <- ssb(object)[] %=% spr0
+      spr0ref <- yearMeans(spr0.yr)
   }
-  
-  spr0.yr = c(spr0.yr)
-  spr0ref = mean(spr0.yr[(length(spr0.yr)-nyears+1):(length(spr0.yr))])
-  
-  if(model %in% c("segreg", "segregDa")){ # Adjust dynamically
+          
+  if(model%in% c("segreg", "segregDa")){ # Adjust dynamically
     ll =plim/pmax
     ul = 1
     #s = an(quantile(c(ll,ul),0.75))
@@ -181,7 +184,7 @@ setMethod("srrTMB", signature(object="FLSR"),
     rec = rec[yri]
     ssb = ssb[yri]
   }
-  
+
   # Fixed Blim
   if(!missing(Blim) & model=="segreg"){
     object <- fmle(object, fixed=list(b=Blim),
@@ -204,7 +207,7 @@ setMethod("srrTMB", signature(object="FLSR"),
     rho = stats::cor(residuals(object)[,-N],residuals(object)[,-1])
     R0 = an(params(object)[1]*params(object)[2])
     B0 = R0*spr0ref
-    attr(object,"SV") = data.frame(s=NA,sigmaR=sigma,R0=R0,rho=rho,B0=B0)
+    attr(object,"SV") = data.frame(s=NA,sigmaR=sigma,R0=R0,rho=rho,B0=c(B0))
     
   } else {
     
@@ -244,10 +247,9 @@ setMethod("srrTMB", signature(object="FLSR"),
     r0init= data.frame(rec=rec,ssb=ssb)       
     r0init=median(r0init[quantile(r0init$ssb,0.6,na.rm=T)>r0init$ssb,]$rec)
     
-    
     # SET init and bounds
     if(model %in% c("segreg", "segregDa")){
-      srp = an(quantile(an((object@ssb/object@rec)/spr0ref),c(0.6)))
+      srp = an(quantile(an((object@ssb/object@rec) %/% spr0ref),c(0.6)))
       srp = max(min(srp,0.9*pmax,srp),plim*1.1)
       if(is.null(s.inp)){
         sinit = 0.99 #1/1.1#1/(srp/plim)
@@ -354,10 +356,9 @@ setMethod("srrTMB", signature(object="FLSR"),
     rho = stats::cor(residuals(object)[,-N],residuals(object)[,-1])
     
     if(model!="segreg"){
-      attr(object,"SV") = data.frame(s=Report$s,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref)
+      attr(object,"SV") = data.frame(s=Report$s,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=c(Report$r0*spr0ref))
     } else{
-      attr(object,"SV") = data.frame(s=NA,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=Report$r0*spr0ref)
-      
+      attr(object,"SV") = data.frame(s=NA,sigmaR=Report$sigR,R0=Report$r0,rho=rho,B0=c(Report$r0*spr0ref))
     }
     
     if(SDreport & report.sR0==FALSE){

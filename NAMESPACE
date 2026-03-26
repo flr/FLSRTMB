@@ -3,7 +3,6 @@ useDynLib(FLSRTMB)
 
 import("TMB")
 import("FLCore")
-import("ggplot2")
 import("ggplotFL")
 import("doFuture")
 importFrom("progressr",

@@ -10,6 +10,7 @@ bootstrapSR(
   method = c("best", "logLik", "relative"),
   models = c("bevholt", "ricker", "segreg"),
   verbose = TRUE,
+  spr0 = yearMeans(spr0y(x)),
   ...
 )
 }
