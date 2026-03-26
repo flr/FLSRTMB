@@ -94,7 +94,6 @@ setMethod("srrTMB", signature(object="FLSR"),
   lplim=0.01, uplim=0.3, Blim="missing",d=1,d.est=TRUE,d.logitsd=100,ld=0.5,ud=3, plim=lplim, pmax=uplim,
   nyears=NULL, report.sR0=FALSE, inits=NULL,
   lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE,rm.yrs="missing",bias.correct=TRUE) {
-browser()
   d.type = c("None")
 
   silent = ifelse(verbose,1,0)
