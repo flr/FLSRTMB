@@ -95,7 +95,7 @@ setMethod("srrTMB", signature(object="FLSR"),
   nyears=NULL, report.sR0=FALSE, inits=NULL,
   lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE,rm.yrs="missing",bias.correct=TRUE) {
   d.type = c("None")
-
+browser()
   silent = ifelse(verbose,1,0)
   
   s.inp = s
@@ -217,10 +217,10 @@ setMethod("srrTMB", signature(object="FLSR"),
     #gmfit = lm(log(rec)~log(spr0.yr))} else {
     gmfit = lm(log(rec)~1)
     #} 
-    
-    fitted(object) <- an(exp(predict(gmfit,data.frame(spr0.yr))))
+browser()    
+    fitted(object) <- an(exp(predict(gmfit,data.frame(c(spr0.yr)))))
     residuals(object) <- log(rec(object)) - log(fitted(object))
-    params(object) <- FLPar(a= an(exp(predict(gmfit,data.frame(spr0.yr= spr0ref)))))
+    params(object) <- FLPar(a= an(exp(predict(gmfit,data.frame(spr0.yr=c(spr0ref))))))
     
     # Add loglik manually (to learn)
     p = length(gmfit$coefficients)
@@ -234,9 +234,9 @@ setMethod("srrTMB", signature(object="FLSR"),
     
     # AR1 rho
     rho = stats::cor(residuals(object)[,-N],residuals(object)[,-1])
-    R0 = an(exp(predict(gmfit,data.frame(spr0.yr= spr0ref))))
+    R0 = an(exp(predict(gmfit,data.frame(spr0.yr=c(spr0ref)))))
     B0 = ifelse(gmB0,R0*spr0ref,NA)
-    attr(object,"SV") = data.frame(s=NA,sigmaR=summary(gmfit)$sigma,R0=R0,rho=rho,B0=B0)
+    attr(object,"SV") = data.frame(s=NA,sigmaR=summary(gmfit)$sigma,R0=R0,rho=rho,B0=c(B0))
   }
   
   # TMB models
