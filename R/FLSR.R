@@ -95,7 +95,7 @@ setMethod("srrTMB", signature(object="FLSR"),
   nyears=NULL, report.sR0=FALSE, inits=NULL,
   lower=NULL, upper=NULL, SDreport=TRUE,verbose=FALSE,rm.yrs="missing",bias.correct=TRUE) {
   d.type = c("None")
-browser()
+
   silent = ifelse(verbose,1,0)
   
   s.inp = s
@@ -217,7 +217,7 @@ browser()
     #gmfit = lm(log(rec)~log(spr0.yr))} else {
     gmfit = lm(log(rec)~1)
     #} 
-browser()    
+
     fitted(object) <- an(exp(predict(gmfit,data.frame(c(spr0.yr)))))
     residuals(object) <- log(rec(object)) - log(fitted(object))
     params(object) <- FLPar(a= an(exp(predict(gmfit,data.frame(spr0.yr=c(spr0ref))))))
